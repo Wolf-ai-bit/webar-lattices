@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR-Marker Druckvorlage - WebAR Kristallstrukturen</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 1cm;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            padding: 20px;
+        }
+
+        .print-container {
+            max-width: 21cm;
+            margin: 0 auto;
+            background: white;
+            padding: 2cm;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .instructions {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid #2196F3;
+        }
+
+        .instructions h2 {
+            color: #1976D2;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .instructions ol {
+            margin-left: 25px;
+            line-height: 1.8;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+        }
+
+        .marker-grid {
+            display: grid;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .marker-card {
+            page-break-inside: avoid;
+            text-align: center;
+            padding: 20px;
+            border: 2px dashed #ccc;
+            border-radius: 12px;
+        }
+
+        .marker-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .marker-subtitle {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .marker-image-wrapper {
+            background: white;
+            padding: 20px;
+            border: 3px solid #333;
+            border-radius: 8px;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .marker-image {
+            width: 12cm;
+            height: 12cm;
+            background: #f5f5f5;
+            border: 2px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 1.2em;
+            text-align: center;
+        }
+
+        .marker-info {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: left;
+            display: inline-block;
+            width: 100%;
+            max-width: 12cm;
+        }
+
+        .marker-info p {
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        .marker-info strong {
+            color: #333;
+        }
+
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 30px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+
+        .print-button:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .cutline {
+            border: 1px dashed #bbb;
+            margin: 20px 0;
+        }
+
+        /* Print-spezifische Styles */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .print-container {
+                box-shadow: none;
+                padding: 0;
+            }
+
+            .print-button {
+                display: none;
+            }
+
+            .instructions {
+                page-break-after: always;
+            }
+
+            .marker-card {
+                page-break-before: always;
+                border: none;
+                padding: 0;
+            }
+
+            .marker-card:first-of-type {
+                page-break-before: avoid;
+            }
+
+            .footer {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="print-button" onclick="window.print()">🖨️ Drucken</button>
+
+    <div class="print-container">
+        <h1>🎯 AR-Marker Druckvorlage</h1>
+        <p class="subtitle">WebAR Kristallstrukturen - BCC/FCC/HCP</p>
+
+        <div class="instructions">
+            <h2>📋 Druckanleitung</h2>
+            <ol>
+                <li><strong>Papier:</strong> Verwende weißes, mattes Papier (A4, 80-120g/m²)</li>
+                <li><strong>Drucker:</strong> Stelle hohe Qualität ein (mindestens 300 DPI)</li>
+                <li><strong>Farbe:</strong> Schwarz-Weiß ist ausreichend (Farbe funktioniert auch)</li>
+                <li><strong>Größe:</strong> Marker sollten mindestens 10×10 cm groß sein</li>
+                <li><strong>Schneiden:</strong> Schneide die Marker entlang der gestrichelten Linie aus</li>
+                <li><strong>Optional:</strong> Laminiere die Marker für längere Haltbarkeit</li>
+                <li><strong>Wichtig:</strong> Keine glänzende Oberfläche! (Reflexionen stören das Tracking)</li>
+            </ol>
+        </div>
+
+        <div class="marker-grid">
+            <!-- BCC Marker -->
+            <div class="marker-card">
+                <div class="marker-title">BCC - Kubisch Raumzentriert</div>
+                <div class="marker-subtitle">Body-Centered Cubic</div>
+
+                <div class="marker-image-wrapper">
+                    <div class="marker-image">
+                        📦<br><br>
+                        <strong>marker_bcc.png</strong><br>
+                        <small>Ersetze dies mit deinem Marker-Bild</small>
+                    </div>
+                </div>
+
+                <div class="marker-info">
+                    <p><strong>Struktur:</strong> 9 Atome (8 Ecken + 1 Zentrum)</p>
+                    <p><strong>Verwendung:</strong> Halte diesen Marker vor die Kamera, um BCC-Struktur anzuzeigen</p>
+                    <p><strong>Größe:</strong> Mindestens 10×10 cm</p>
+                </div>
+            </div>
+
+            <div class="cutline"></div>
+
+            <!-- FCC Marker -->
+            <div class="marker-card">
+                <div class="marker-title">FCC - Kubisch Flächenzentriert</div>
+                <div class="marker-subtitle">Face-Centered Cubic</div>
+
+                <div class="marker-image-wrapper">
+                    <div class="marker-image">
+                        📐<br><br>
+                        <strong>marker_fcc.png</strong><br>
+                        <small>Ersetze dies mit deinem Marker-Bild</small>
+                    </div>
+                </div>
+
+                <div class="marker-info">
+                    <p><strong>Struktur:</strong> 14 Atome (8 Ecken + 6 Flächen)</p>
+                    <p><strong>Verwendung:</strong> Halte diesen Marker vor die Kamera, um FCC-Struktur anzuzeigen</p>
+                    <p><strong>Größe:</strong> Mindestens 10×10 cm</p>
+                </div>
+            </div>
+
+            <div class="cutline"></div>
+
+            <!-- HCP Marker -->
+            <div class="marker-card">
+                <div class="marker-title">HCP - Hexagonal Dichtest Gepackt</div>
+                <div class="marker-subtitle">Hexagonal Close-Packed</div>
+
+                <div class="marker-image-wrapper">
+                    <div class="marker-image">
+                        ⬡<br><br>
+                        <strong>marker_hcp.png</strong><br>
+                        <small>Ersetze dies mit deinem Marker-Bild</small>
+                    </div>
+                </div>
+
+                <div class="marker-info">
+                    <p><strong>Struktur:</strong> 17 Atome (12 Hexagon + 2 Zentren + 3 Mitte)</p>
+                    <p><strong>Verwendung:</strong> Halte diesen Marker vor die Kamera, um HCP-Struktur anzuzeigen</p>
+                    <p><strong>Größe:</strong> Mindestens 10×10 cm</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong>WebAR Kristallstrukturen</strong> | 2025</p>
+            <p>https://github.com/Wolf-ai-bit/webar-lattices</p>
+            <p style="margin-top: 10px; font-size: 0.85em;">
+                💡 Tipp: Du kannst die PNG-Dateien direkt in dieses HTML-Template einfügen<br>
+                oder separate Ausdrucke der Marker-Bilder machen.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Auto-Druck beim Laden (optional)
+        // window.addEventListener('load', () => {
+        //     setTimeout(() => window.print(), 1000);
+        // });
+
+        // Tastenkürzel für Druck (Strg+P ist Standard, aber zusätzlich P-Taste)
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'p' || e.key === 'P') {
+                e.preventDefault();
+                window.print();
+            }
+        });
+    </script>
+</body>
+</html>

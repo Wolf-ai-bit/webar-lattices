@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>WebAR Kristallstrukturen - BCC/FCC/HCP</title>
+    <meta name="description" content="Interaktive AR-Visualisierung von Kristallstrukturen: BCC, FCC und HCP mit Atom- und Schematisch-Modi">
+
+    <!-- MindAR + A-Frame -->
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loader">
+            <div class="spinner"></div>
+            <h2>WebAR Kristallstrukturen</h2>
+            <p>Lade AR-Bibliotheken...</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instructions Overlay -->
+    <div id="instructions-overlay">
+        <div class="instructions-content">
+            <h2>🎯 Anleitung</h2>
+            <ol>
+                <li><strong>Erlaube</strong> Kamera-Zugriff</li>
+                <li><strong>Halte</strong> einen AR-Marker vor die Kamera:
+                    <ul>
+                        <li>📐 <strong>BCC-Marker</strong> → Kubisch raumzentriert</li>
+                        <li>📦 <strong>FCC-Marker</strong> → Kubisch flächenzentriert</li>
+                        <li>⬡ <strong>HCP-Marker</strong> → Hexagonal dichtest gepackt</li>
+                    </ul>
+                </li>
+                <li><strong>Wechsle</strong> mit dem Button zwischen Atom- und Schematisch-Modus</li>
+            </ol>
+            <button id="start-ar-btn">AR starten</button>
+            <p class="note">💡 Marker nicht verfügbar? <a href="assets/markers/print-markers.html" target="_blank">Hier ausdrucken</a></p>
+        </div>
+    </div>
+
+    <!-- UI Overlay -->
+    <div id="ui-overlay">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="logo">WebAR Kristallstrukturen</div>
+            <div class="controls">
+                <button id="info-btn" class="ui-btn" title="Informationen">ℹ️</button>
+            </div>
+        </div>
+
+        <!-- Structure Info Display -->
+        <div id="structure-info" class="structure-info hidden">
+            <h3 id="structure-name">Keine Struktur erkannt</h3>
+            <p id="structure-desc">Halte einen Marker vor die Kamera</p>
+            <div class="structure-details">
+                <div class="detail-item">
+                    <span class="detail-label">Atome:</span>
+                    <span class="detail-value" id="atom-count">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Modus:</span>
+                    <span class="detail-value" id="current-mode">Atom</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mode Toggle Button -->
+        <button id="mode-toggle" class="mode-toggle hidden">
+            <span class="mode-icon">🔄</span>
+            <span class="mode-text">Zu Schematisch wechseln</span>
+        </button>
+
+        <!-- Bottom Bar -->
+        <div class="bottom-bar">
+            <div class="status-indicator">
+                <span class="status-dot" id="status-dot"></span>
+                <span id="status-text">Initialisiere AR...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Model Controls Component -->
+    <script src="js/model-controls.js"></script>
+
+    <!-- GLTF Multi-Mesh Component (Fix für A-Frame's single-mesh rendering) -->
+    <script src="js/gltf-multi-mesh.js"></script>
+
+    <!-- A-Frame Scene -->
+    <a-scene
+        mindar-image="imageTargetSrc: assets/markers/targets.mind; maxTrack: 3; filterMinCF: 0.0001; filterBeta: 0.001; missTolerance: 5; warmupTolerance: 5;"
+        color-space="sRGB"
+        renderer="colorManagement: true; physicallyCorrectLights: true; antialias: true; alpha: true; logarithmicDepthBuffer: true"
+        vr-mode-ui="enabled: false"
+        device-orientation-permission-ui="enabled: false"
+        id="ar-scene">
+
+        <a-assets>
+            <!-- BCC Models - Cache-Busting v14: Ecken=Rot, Zentrum=Blau -->
+            <a-asset-item id="bcc-atom-model" src="assets/models/bcc_atom.glb?v=14"></a-asset-item>
+            <a-asset-item id="bcc-schematic-model" src="assets/models/bcc_schematic.glb?v=14"></a-asset-item>
+
+            <!-- FCC Models - v17: Index 4=Rot, Index 5=Blau (v15 wiederhergestellt) -->
+            <a-asset-item id="fcc-atom-model" src="assets/models/fcc_atom.glb?v=17"></a-asset-item>
+            <a-asset-item id="fcc-schematic-model" src="assets/models/fcc_schematic.glb?v=17"></a-asset-item>
+
+            <!-- HCP Models - Unten/Oben=Rot, Mitte=Blau, Mittelschicht zentriert -->
+            <a-asset-item id="hcp-atom-model" src="assets/models/hcp_atom.glb?v=14"></a-asset-item>
+            <a-asset-item id="hcp-schematic-model" src="assets/models/hcp_schematic.glb?v=14"></a-asset-item>
+        </a-assets>
+
+        <!-- Camera -->
+        <a-camera position="0 0 0" look-controls="enabled: false" cursor="fuse: false; rayOrigin: mouse;" raycaster="near: 0.1; far: 10000;"></a-camera>
+
+        <!-- Lighting - Verbesserte Beleuchtung -->
+        <a-entity light="type: ambient; color: #FFF; intensity: 1.0"></a-entity>
+        <a-entity light="type: directional; color: #FFF; intensity: 1.2" position="-2 3 2"></a-entity>
+        <a-entity light="type: directional; color: #FFF; intensity: 0.8" position="2 2 -2"></a-entity>
+        <a-entity light="type: point; color: #FFF; intensity: 0.5" position="0 2 0"></a-entity>
+
+        <!-- BCC Target (Index 0) -->
+        <a-entity mindar-image-target="targetIndex: 0" id="bcc-target">
+            <a-entity id="bcc-models" position="0 0 0" model-controls>
+                <a-gltf-model
+                    id="bcc-atom"
+                    src="#bcc-atom-model"
+                    position="0 0 0"
+                    scale="0.05 0.05 0.05"
+                    rotation="0 0 0"
+                    visible="true"
+                    gltf-multi-mesh>
+                </a-gltf-model>
+
+                <a-gltf-model
+                    id="bcc-schematic"
+                    src="#bcc-schematic-model"
+                    position="0 0 0"
+                    scale="0.05 0.05 0.05"
+                    rotation="0 0 0"
+                    visible="false"
+                    gltf-multi-mesh>
+                </a-gltf-model>
+            </a-entity>
+        </a-entity>
+
+        <!-- FCC Target (Index 1) -->
+        <a-entity mindar-image-target="targetIndex: 1" id="fcc-target">
+            <a-entity id="fcc-models" position="0 0 0" model-controls>
+                <a-gltf-model
+                    id="fcc-atom"
+                    src="#fcc-atom-model"
+                    position="0 0 0"
+                    scale="0.05 0.05 0.05"
+                    rotation="0 0 0"
+                    visible="true"
+                    gltf-multi-mesh>
+                </a-gltf-model>
+
+                <a-gltf-model
+                    id="fcc-schematic"
+                    src="#fcc-schematic-model"
+                    position="0 0 0"
+                    scale="0.05 0.05 0.05"
+                    rotation="0 0 0"
+                    visible="false"
+                    gltf-multi-mesh>
+                </a-gltf-model>
+            </a-entity>
+        </a-entity>
+
+        <!-- HCP Target (Index 2) -->
+        <a-entity mindar-image-target="targetIndex: 2" id="hcp-target">
+            <a-entity id="hcp-models" position="0 0 0" model-controls>
+                <a-gltf-model
+                    id="hcp-atom"
+                    src="#hcp-atom-model"
+                    position="0 0 0"
+                    scale="0.05 0.05 0.05"
+                    rotation="0 0 0"
+                    visible="true"
+                    gltf-multi-mesh>
+                </a-gltf-model>
+
+                <a-gltf-model
+                    id="hcp-schematic"
+                    src="#hcp-schematic-model"
+                    position="0 0 0"
+                    scale="0.05 0.05 0.05"
+                    rotation="0 0 0"
+                    visible="false"
+                    gltf-multi-mesh>
+                </a-gltf-model>
+            </a-entity>
+        </a-entity>
+    </a-scene>
+
+    <!-- Main JavaScript -->
+    <script src="js/app.js"></script>
+</body>
+</html>

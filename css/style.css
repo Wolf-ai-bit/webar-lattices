@@ -1,0 +1,529 @@
+/* ============================================================================
+   WebAR Kristallstrukturen - Stylesheet
+   ============================================================================ */
+
+/* Reset & Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================================================
+   Loading Screen
+   ============================================================================ */
+
+#loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    transition: opacity 0.5s ease-out;
+}
+
+#loading-screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.loader {
+    text-align: center;
+    color: white;
+}
+
+.spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loader h2 {
+    font-size: 1.8em;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.loader p {
+    font-size: 1em;
+    opacity: 0.9;
+    margin-bottom: 20px;
+}
+
+.progress-bar {
+    width: 300px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+.progress-fill {
+    height: 100%;
+    background: white;
+    width: 0%;
+    transition: width 0.3s ease;
+    border-radius: 3px;
+}
+
+/* ============================================================================
+   Instructions Overlay
+   ============================================================================ */
+
+#instructions-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9000;
+    transition: opacity 0.3s ease-out;
+}
+
+#instructions-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.instructions-content {
+    background: white;
+    padding: 40px;
+    border-radius: 16px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.instructions-content h2 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 1.8em;
+    text-align: center;
+}
+
+.instructions-content ol {
+    margin-left: 20px;
+    line-height: 1.8;
+    color: #555;
+    margin-bottom: 30px;
+}
+
+.instructions-content ol li {
+    margin-bottom: 15px;
+}
+
+.instructions-content ul {
+    margin-left: 20px;
+    margin-top: 10px;
+}
+
+.instructions-content ul li {
+    list-style-type: none;
+    padding: 5px 0;
+}
+
+#start-ar-btn {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+#start-ar-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+}
+
+#start-ar-btn:active {
+    transform: translateY(0);
+}
+
+.note {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.note a {
+    color: #667eea;
+    text-decoration: none;
+}
+
+.note a:hover {
+    text-decoration: underline;
+}
+
+/* ============================================================================
+   UI Overlay
+   ============================================================================ */
+
+#ui-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+#ui-overlay > * {
+    pointer-events: auto;
+}
+
+/* Top Bar */
+.top-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 15px 20px;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), transparent);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    color: white;
+    font-size: 1.1em;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.controls {
+    display: flex;
+    gap: 10px;
+}
+
+.ui-btn {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 50%;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.ui-btn:hover {
+    background: white;
+    transform: scale(1.1);
+}
+
+.ui-btn:active {
+    transform: scale(0.95);
+}
+
+/* Structure Info Display */
+.structure-info {
+    position: absolute;
+    top: 80px;
+    left: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    max-width: 300px;
+    transition: all 0.3s ease;
+}
+
+.structure-info.hidden {
+    opacity: 0;
+    transform: translateY(-20px);
+    pointer-events: none;
+}
+
+.structure-info h3 {
+    color: #333;
+    font-size: 1.3em;
+    margin-bottom: 8px;
+}
+
+.structure-info p {
+    color: #666;
+    font-size: 0.9em;
+    margin-bottom: 15px;
+}
+
+.structure-details {
+    display: grid;
+    gap: 10px;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    color: #888;
+    font-size: 0.9em;
+}
+
+.detail-value {
+    color: #333;
+    font-weight: 600;
+    font-size: 0.9em;
+}
+
+/* Mode Toggle Button */
+.mode-toggle {
+    position: absolute;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 50px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mode-toggle.hidden {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+    pointer-events: none;
+}
+
+.mode-toggle:hover {
+    transform: translateX(-50%) translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+.mode-toggle:active {
+    transform: translateX(-50%) translateY(0);
+}
+
+.mode-icon {
+    font-size: 1.2em;
+}
+
+.mode-text {
+    font-size: 1em;
+}
+
+/* Bottom Bar */
+.bottom-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 15px 20px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+    font-size: 0.9em;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ff6b6b;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.status-dot.active {
+    background: #51cf66;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* ============================================================================
+   A-Frame Scene
+   ============================================================================ */
+
+#ar-scene {
+    width: 100%;
+    height: 100%;
+}
+
+/* Remove A-Frame default UI */
+.a-enter-vr {
+    display: none !important;
+}
+
+.a-orientation-modal {
+    display: none !important;
+}
+
+/* ============================================================================
+   Responsive Design
+   ============================================================================ */
+
+@media (max-width: 768px) {
+    .logo {
+        font-size: 0.9em;
+    }
+
+    .structure-info {
+        max-width: calc(100% - 40px);
+        top: 70px;
+    }
+
+    .mode-toggle {
+        bottom: 80px;
+        padding: 12px 25px;
+        font-size: 0.9em;
+    }
+
+    .instructions-content {
+        padding: 30px 20px;
+    }
+
+    .instructions-content h2 {
+        font-size: 1.5em;
+    }
+}
+
+@media (max-width: 480px) {
+    .top-bar {
+        padding: 10px 15px;
+    }
+
+    .logo {
+        font-size: 0.8em;
+    }
+
+    .ui-btn {
+        width: 35px;
+        height: 35px;
+        font-size: 1em;
+    }
+
+    .structure-info {
+        padding: 15px;
+        top: 60px;
+    }
+
+    .structure-info h3 {
+        font-size: 1.1em;
+    }
+
+    .mode-toggle {
+        bottom: 70px;
+        padding: 10px 20px;
+        font-size: 0.85em;
+    }
+
+    .mode-icon {
+        font-size: 1em;
+    }
+}
+
+/* ============================================================================
+   Print Styles (für Marker-Ausdrucke)
+   ============================================================================ */
+
+@media print {
+    #ui-overlay,
+    #loading-screen,
+    #instructions-overlay,
+    #ar-scene {
+        display: none !important;
+    }
+}
+
+/* ============================================================================
+   Animations
+   ============================================================================ */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* ============================================================================
+   Dark Mode Support
+   ============================================================================ */
+
+@media (prefers-color-scheme: dark) {
+    .instructions-content {
+        background: #2d2d2d;
+        color: #e0e0e0;
+    }
+
+    .instructions-content h2 {
+        color: #f0f0f0;
+    }
+
+    .instructions-content ol li {
+        color: #d0d0d0;
+    }
+
+    .note {
+        color: #aaa;
+    }
+}
