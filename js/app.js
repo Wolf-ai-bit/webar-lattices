@@ -263,6 +263,25 @@ function onTargetLost(structureType) {
     // Nur wenn ein anderer Marker erkannt wird, wird gewechselt
     console.log(`[WebAR] ${structureType.toUpperCase()} Marker verloren (Modell bleibt sichtbar)`);
 
+    // WICHTIG: Stelle sicher, dass das Modell sichtbar bleibt, auch wenn MindAR das Target versteckt
+    // Dies ist notwendig, weil MindAR automatisch die Sichtbarkeit des Targets auf false setzt
+    if (appState.freeMode && appState.activeStructure === structureType) {
+        // Warte kurz, dann stelle sicher dass die Modelle sichtbar bleiben
+        setTimeout(() => {
+            const atomModel = document.getElementById(`${structureType}-atom`);
+            const schematicModel = document.getElementById(`${structureType}-schematic`);
+
+            // Setze Sichtbarkeit basierend auf aktuellem Modus
+            if (appState.currentMode === 'atom' && atomModel) {
+                atomModel.setAttribute('visible', 'true');
+            } else if (appState.currentMode === 'schematic' && schematicModel) {
+                schematicModel.setAttribute('visible', 'true');
+            }
+
+            console.log(`[WebAR] Modell-Sichtbarkeit wiederhergestellt für: ${structureType}`);
+        }, 100);
+    }
+
     // Status aktualisieren (aber UI bleibt sichtbar)
     updateStatus(`${structureInfo[structureType].name} - Marker nicht mehr sichtbar`, true);
 }
@@ -288,6 +307,30 @@ function toggleMode() {
     // Modell-Sichtbarkeit für aktuellen Target aktualisieren
     if (appState.activeTarget) {
         updateModelVisibility(appState.activeTarget);
+
+        // Wenn im Free Mode, reaktiviere Free Mode für das neue sichtbare Modell
+        if (appState.freeMode && appState.activeStructure) {
+            // Deaktiviere Free Mode für alte Modelle
+            const structureType = appState.activeStructure;
+            const atomModel = document.getElementById(`${structureType}-atom`);
+            const schematicModel = document.getElementById(`${structureType}-schematic`);
+
+            // Deaktiviere Free Mode für beide
+            if (atomModel) atomModel.setAttribute('free-mode', { enabled: false });
+            if (schematicModel) schematicModel.setAttribute('free-mode', { enabled: false });
+
+            // Warte kurz, dann aktiviere Free Mode für das jetzt sichtbare Modell
+            setTimeout(() => {
+                const visibleModel = (newMode === 'atom') ? atomModel : schematicModel;
+                if (visibleModel) {
+                    visibleModel.setAttribute('free-mode', {
+                        enabled: true,
+                        structureType: structureType
+                    });
+                    console.log(`[WebAR] Free Mode reaktiviert für: ${visibleModel.id}`);
+                }
+            }, 100);
+        }
     }
 }
 
@@ -435,9 +478,52 @@ function enterFreeMode(structureType) {
             structureType: structureType
         });
         console.log(`[WebAR] Free Mode aktiviert für Modell: ${visibleModel.id}`);
+
+        // Starte Sichtbarkeits-Watcher der sicherstellt, dass das Modell sichtbar bleibt
+        startVisibilityWatcher(structureType);
     }
 
     updateStatus(`${structureInfo[structureType].name} - Frei drehbar`, true);
+}
+
+/**
+ * Überwacht die Sichtbarkeit eines Modells und stellt sicher, dass es sichtbar bleibt
+ */
+let visibilityWatcherInterval = null;
+
+function startVisibilityWatcher(structureType) {
+    // Stoppe vorherigen Watcher
+    if (visibilityWatcherInterval) {
+        clearInterval(visibilityWatcherInterval);
+    }
+
+    // Starte neuen Watcher
+    visibilityWatcherInterval = setInterval(() => {
+        if (appState.freeMode && appState.activeStructure === structureType) {
+            const atomModel = document.getElementById(`${structureType}-atom`);
+            const schematicModel = document.getElementById(`${structureType}-schematic`);
+
+            // Stelle sicher, dass das aktive Modell sichtbar ist
+            if (appState.currentMode === 'atom' && atomModel) {
+                if (atomModel.getAttribute('visible') !== 'true') {
+                    console.log(`[WebAR] Visibility Watcher: Setze ${structureType}-atom auf visible`);
+                    atomModel.setAttribute('visible', 'true');
+                }
+            } else if (appState.currentMode === 'schematic' && schematicModel) {
+                if (schematicModel.getAttribute('visible') !== 'true') {
+                    console.log(`[WebAR] Visibility Watcher: Setze ${structureType}-schematic auf visible`);
+                    schematicModel.setAttribute('visible', 'true');
+                }
+            }
+        }
+    }, 200); // Prüfe alle 200ms
+}
+
+function stopVisibilityWatcher() {
+    if (visibilityWatcherInterval) {
+        clearInterval(visibilityWatcherInterval);
+        visibilityWatcherInterval = null;
+    }
 }
 
 /**
@@ -447,6 +533,9 @@ function exitFreeMode(structureType) {
     console.log(`[WebAR] Deaktiviere Free Mode für: ${structureType}`);
 
     appState.freeMode = false;
+
+    // Stoppe Sichtbarkeits-Watcher
+    stopVisibilityWatcher();
 
     const atomModel = document.getElementById(`${structureType}-atom`);
     const schematicModel = document.getElementById(`${structureType}-schematic`);
