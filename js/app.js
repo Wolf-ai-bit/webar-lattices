@@ -10,28 +10,28 @@
 
 const appState = {
     currentMode: 'atom',           // 'atom' oder 'schematic'
-    activeTarget: null,             // null, 'bcc', 'fcc', 'hcp'
+    activeTarget: null,             // null, 'krz', 'kfz', 'hdp'
     arReady: false,
     trackingActive: false
 };
 
 // Struktur-Informationen
 const structureInfo = {
-    bcc: {
-        name: 'BCC - Kubisch Raumzentriert',
-        description: 'Body-Centered Cubic',
+    krz: {
+        name: 'KRZ - Kubisch Raumzentriert',
+        description: 'Kubisch-Raumzentrierte Struktur',
         atomCount: 9,
         details: '8 Eckatome + 1 Zentralatom'
     },
-    fcc: {
-        name: 'FCC - Kubisch Flächenzentriert',
-        description: 'Face-Centered Cubic',
+    kfz: {
+        name: 'KFZ - Kubisch Flächenzentriert',
+        description: 'Kubisch-Flächenzentrierte Struktur',
         atomCount: 14,
         details: '8 Eckatome + 6 Flächenatome'
     },
-    hcp: {
-        name: 'HCP - Hexagonal Dichtest Gepackt',
-        description: 'Hexagonal Close-Packed',
+    hdp: {
+        name: 'HDP - Hexagonal Dichteste Packung',
+        description: 'Hexagonal-Dichteste-Packung',
         atomCount: 17,
         details: '12 Hexagon-Ecken + 2 Zentren + 3 Mitte'
     }
@@ -71,9 +71,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Progress Bar Animation (simuliert)
     simulateLoading();
-
-    // QR-Codes generieren
-    generateQRCodes();
 });
 
 /**
@@ -117,9 +114,9 @@ function registerEventListeners() {
     scene.addEventListener('arError', onARError);
 
     // Target Events für alle drei Strukturen
-    setupTargetTracking('bcc', 0);
-    setupTargetTracking('fcc', 1);
-    setupTargetTracking('hcp', 2);
+    setupTargetTracking('krz', 0);
+    setupTargetTracking('kfz', 1);
+    setupTargetTracking('hdp', 2);
 }
 
 // ============================================================================
@@ -231,7 +228,7 @@ function onTargetFound(structureType) {
  * Versteckt alle Modelle
  */
 function hideAllModels() {
-    const allStructures = ['bcc', 'fcc', 'hcp'];
+    const allStructures = ['krz', 'kfz', 'hdp'];
 
     allStructures.forEach(structure => {
         const atomModel = document.getElementById(`${structure}-atom`);
@@ -372,70 +369,23 @@ window.debugWebAR = () => {
     logAppState();
 
     console.log('[WebAR] Verfügbare Targets:', {
-        bcc: document.getElementById('bcc-target'),
-        fcc: document.getElementById('fcc-target'),
-        hcp: document.getElementById('hcp-target')
+        krz: document.getElementById('krz-target'),
+        kfz: document.getElementById('kfz-target'),
+        hdp: document.getElementById('hdp-target')
     });
 
     console.log('[WebAR] Verfügbare Modelle:', {
-        bcc_atom: document.getElementById('bcc-atom'),
-        bcc_schematic: document.getElementById('bcc-schematic'),
-        fcc_atom: document.getElementById('fcc-atom'),
-        fcc_schematic: document.getElementById('fcc-schematic'),
-        hcp_atom: document.getElementById('hcp-atom'),
-        hcp_schematic: document.getElementById('hcp-schematic')
+        krz_atom: document.getElementById('krz-atom'),
+        krz_schematic: document.getElementById('krz-schematic'),
+        kfz_atom: document.getElementById('kfz-atom'),
+        kfz_schematic: document.getElementById('kfz-schematic'),
+        hdp_atom: document.getElementById('hdp-atom'),
+        hdp_schematic: document.getElementById('hdp-schematic')
     });
 };
 
 // Console-Hinweis für Entwickler
 console.log('[WebAR] Debugging verfügbar: window.debugWebAR()');
-
-// ============================================================================
-// QR CODE GENERATION
-// ============================================================================
-
-/**
- * Generiert QR-Codes für schnellen Zugriff auf die Webseite
- */
-function generateQRCodes() {
-    const baseURL = 'https://wolf-ai-bit.github.io/webar-lattices';
-
-    try {
-        // QR-Code für Hauptseite
-        new QRCode(document.getElementById('qrcode-main'), {
-            text: baseURL,
-            width: 100,
-            height: 100,
-            colorDark: '#667eea',
-            colorLight: '#ffffff',
-            correctLevel: QRCode.CorrectLevel.M
-        });
-
-        // QR-Code für BCC Marker
-        new QRCode(document.getElementById('qrcode-bcc'), {
-            text: `${baseURL}/assets/markers/marker_bcc.png`,
-            width: 100,
-            height: 100,
-            colorDark: '#667eea',
-            colorLight: '#ffffff',
-            correctLevel: QRCode.CorrectLevel.M
-        });
-
-        // QR-Code für Marker-Druckseite
-        new QRCode(document.getElementById('qrcode-markers'), {
-            text: `${baseURL}/assets/markers/print-markers.html`,
-            width: 100,
-            height: 100,
-            colorDark: '#667eea',
-            colorLight: '#ffffff',
-            correctLevel: QRCode.CorrectLevel.M
-        });
-
-        console.log('[WebAR] QR-Codes erfolgreich generiert');
-    } catch (error) {
-        console.error('[WebAR] Fehler beim Generieren der QR-Codes:', error);
-    }
-}
 
 // ============================================================================
 // FEHLERBEHANDLUNG

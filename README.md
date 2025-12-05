@@ -1,6 +1,6 @@
 # WebAR Kristallstrukturen
 
-Interaktive Augmented Reality Visualisierung von Metallgitterstrukturen: **BCC**, **FCC** und **HCP** mit umschaltbaren Darstellungsmodi.
+Interaktive Augmented Reality Visualisierung von Metallgitterstrukturen: **KRZ**, **KFZ** und **HDP** mit umschaltbaren Darstellungsmodi.
 
 ![WebAR Lattices](assets/preview.png)
 
@@ -9,9 +9,9 @@ Interaktive Augmented Reality Visualisierung von Metallgitterstrukturen: **BCC**
 ## Features
 
 - **3 Kristallstrukturen:**
-  - **BCC** (Body-Centered Cubic) - Kubisch raumzentriert
-  - **FCC** (Face-Centered Cubic) - Kubisch flächenzentriert
-  - **HCP** (Hexagonal Close-Packed) - Hexagonal dichtest gepackt
+  - **KRZ** (Kubisch Raumzentriert)
+  - **KFZ** (Kubisch Flächenzentriert)
+  - **HDP** (Hexagonal Dichteste Packung)
 
 - **2 Darstellungsmodi:**
   - **Atom-Modus**: Große, realistische Atome (berührend)
@@ -82,9 +82,9 @@ webar-lattices/
 
 Die AR-Marker befinden sich in [`assets/markers/`](assets/markers/):
 
-- **[marker_bcc.png](assets/markers/marker_bcc.png)** - BCC (Kubisch raumzentriert)
-- **[marker_fcc.png](assets/markers/marker_fcc.png)** - FCC (Kubisch flächenzentriert)
-- **[marker_hcp.png](assets/markers/marker_hcp.png)** - HCP (Hexagonal dichtest gepackt)
+- **[marker_krz.png](assets/markers/marker_krz.png)** - KRZ (Kubisch raumzentriert)
+- **[marker_kfz.png](assets/markers/marker_kfz.png)** - KFZ (Kubisch flächenzentriert)
+- **[marker_hdp.png](assets/markers/marker_hdp.png)** - HDP (Hexagonal dichteste Packung)
 
 **Druckanleitung:**
 1. Öffne [`assets/markers/print-markers.html`](assets/markers/print-markers.html)
@@ -212,9 +212,9 @@ Du kannst die Marker auch am Desktop-Bildschirm anzeigen und mit Smartphone-Kame
 
 | Struktur | Atome | Atom-Radius (Atom) | Atom-Radius (Schematic) | Bindungen |
 |----------|-------|-------------------|------------------------|-----------|
-| **BCC**  | 9     | 43.3 Units        | 10.0 Units             | Zentrum → 8 Ecken |
-| **FCC**  | 14    | 35.35 Units       | 10.0 Units             | Ecken → nächste Flächen |
-| **HCP**  | 17    | 30.0 Units        | 10.0 Units             | Hexagon-Kanten + Vertikal |
+| **KRZ**  | 9     | 43.3 Units        | 10.0 Units             | Zentrum → 8 Ecken |
+| **KFZ**  | 14    | 35.35 Units       | 10.0 Units             | Ecken → nächste Flächen |
+| **HDP**  | 17    | 30.0 Units        | 10.0 Units             | Hexagon-Kanten + Vertikal |
 
 ### Export-Workflow (aus OpenFrameworks)
 
@@ -224,12 +224,12 @@ cd ../ar-lattices/bin
 ./ar-lattices.exe
 
 # 2. Exportiere alle Modelle:
-# [1] [A] [E]  → bcc_atom.obj
-# [1] [S] [E]  → bcc_schematic.obj
-# [2] [A] [E]  → fcc_atom.obj
-# [2] [S] [E]  → fcc_schematic.obj
-# [3] [A] [E]  → hcp_atom.obj
-# [3] [S] [E]  → hcp_schematic.obj
+# [1] [A] [E]  → krz_atom.obj (bcc_atom.obj)
+# [1] [S] [E]  → krz_schematic.obj (bcc_schematic.obj)
+# [2] [A] [E]  → kfz_atom.obj (fcc_atom.obj)
+# [2] [S] [E]  → kfz_schematic.obj (fcc_schematic.obj)
+# [3] [A] [E]  → hdp_atom.obj (hcp_atom.obj)
+# [3] [S] [E]  → hdp_schematic.obj (hcp_schematic.obj)
 
 # 3. Konvertiere mit Blender:
 cd ../ar-lattices

@@ -85,9 +85,9 @@ Erwartete Ausgabe: **6 GLB-Dateien**, jeweils < 2 MB
 ### A) Marker-Bilder designen
 
 Erstelle 3 Marker-Bilder (siehe [ar-lattices/MARKER_GUIDE.md](../ar-lattices/MARKER_GUIDE.md)):
-- `marker_bcc.png` (640×640 px, high contrast)
-- `marker_fcc.png` (640×640 px, high contrast)
-- `marker_hcp.png` (640×640 px, high contrast)
+- `marker_krz.png` (640×640 px, high contrast) - Kubisch Raumzentriert
+- `marker_kfz.png` (640×640 px, high contrast) - Kubisch Flächenzentriert
+- `marker_hdp.png` (640×640 px, high contrast) - Hexagonal Dichteste Packung
 
 **Speicherort:** `webar-lattices/assets/markers/`
 
@@ -250,7 +250,7 @@ https://Wolf-ai-bit.github.io/webar-lattices
 
 3. **Testing-Checklist:**
    - [ ] Kamera startet
-   - [ ] Marker wird erkannt (BCC/FCC/HCP)
+   - [ ] Marker wird erkannt (KRZ/KFZ/HDP)
    - [ ] 3D-Modell erscheint über Marker
    - [ ] Modell rotiert
    - [ ] Mode-Toggle funktioniert

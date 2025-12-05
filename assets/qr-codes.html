@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR-Codes - WebAR Kristallstrukturen</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .instructions {
+            background: #f0f4ff;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            border-left: 4px solid #667eea;
+        }
+
+        .instructions h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .instructions ol {
+            margin-left: 25px;
+            line-height: 1.8;
+            color: #555;
+        }
+
+        .qr-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .qr-card {
+            text-align: center;
+            padding: 25px;
+            background: #f9f9f9;
+            border-radius: 12px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .qr-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .qr-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .qr-card .structure-type {
+            color: #888;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+        }
+
+        .qr-code-wrapper {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            display: inline-block;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+        }
+
+        .qr-info {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #666;
+            text-align: left;
+        }
+
+        .qr-info strong {
+            color: #333;
+        }
+
+        .back-button {
+            display: block;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .qr-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+    <!-- QR Code Generator -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>AR-Marker QR-Codes</h1>
+        <p class="subtitle">Scanne die QR-Codes, um die AR-Marker anzuzeigen</p>
+
+        <div class="instructions">
+            <h2>Anleitung</h2>
+            <ol>
+                <li><strong>Öffne</strong> diese Seite auf einem Desktop/Laptop</li>
+                <li><strong>Scanne</strong> einen der QR-Codes mit deinem Smartphone</li>
+                <li><strong>Der Marker</strong> wird auf deinem Smartphone angezeigt</li>
+                <li><strong>Öffne</strong> die WebAR-Seite auf einem zweiten Gerät</li>
+                <li><strong>Halte</strong> das zweite Gerät vor den Marker auf dem ersten Gerät</li>
+                <li><strong>Das 3D-Modell</strong> erscheint über dem Marker</li>
+            </ol>
+        </div>
+
+        <div class="qr-grid">
+            <!-- KRZ Marker -->
+            <div class="qr-card">
+                <h3>KRZ-Marker</h3>
+                <p class="structure-type">Kubisch Raumzentriert</p>
+                <div class="qr-code-wrapper">
+                    <div id="qrcode-krz"></div>
+                </div>
+                <div class="qr-info">
+                    <p><strong>Struktur:</strong> 9 Atome</p>
+                    <p><strong>Beschreibung:</strong> 8 Eckatome + 1 Zentralatom</p>
+                </div>
+            </div>
+
+            <!-- KFZ Marker -->
+            <div class="qr-card">
+                <h3>KFZ-Marker</h3>
+                <p class="structure-type">Kubisch Flächenzentriert</p>
+                <div class="qr-code-wrapper">
+                    <div id="qrcode-kfz"></div>
+                </div>
+                <div class="qr-info">
+                    <p><strong>Struktur:</strong> 14 Atome</p>
+                    <p><strong>Beschreibung:</strong> 8 Eckatome + 6 Flächenatome</p>
+                </div>
+            </div>
+
+            <!-- HDP Marker -->
+            <div class="qr-card">
+                <h3>HDP-Marker</h3>
+                <p class="structure-type">Hexagonal Dichteste Packung</p>
+                <div class="qr-code-wrapper">
+                    <div id="qrcode-hdp"></div>
+                </div>
+                <div class="qr-info">
+                    <p><strong>Struktur:</strong> 17 Atome</p>
+                    <p><strong>Beschreibung:</strong> 12 Hexagon + 2 Zentren + 3 Mitte</p>
+                </div>
+            </div>
+        </div>
+
+        <a href="../index.html" class="back-button">Zurück zur Hauptseite</a>
+    </div>
+
+    <script>
+        // Basis-URL für die Marker
+        const baseURL = 'https://wolf-ai-bit.github.io/webar-lattices';
+
+        // QR-Code für KRZ Marker
+        new QRCode(document.getElementById('qrcode-krz'), {
+            text: `${baseURL}/assets/markers/marker_krz.png`,
+            width: 180,
+            height: 180,
+            colorDark: '#667eea',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.H
+        });
+
+        // QR-Code für KFZ Marker
+        new QRCode(document.getElementById('qrcode-kfz'), {
+            text: `${baseURL}/assets/markers/marker_kfz.png`,
+            width: 180,
+            height: 180,
+            colorDark: '#667eea',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.H
+        });
+
+        // QR-Code für HDP Marker
+        new QRCode(document.getElementById('qrcode-hdp'), {
+            text: `${baseURL}/assets/markers/marker_hdp.png`,
+            width: 180,
+            height: 180,
+            colorDark: '#667eea',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.H
+        });
+
+        console.log('[QR-Codes] Alle QR-Codes erfolgreich generiert');
+    </script>
+</body>
+</html>

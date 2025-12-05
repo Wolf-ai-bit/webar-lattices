@@ -186,54 +186,6 @@ body {
     text-decoration: underline;
 }
 
-/* QR Codes Section */
-.qr-codes-section {
-    margin: 30px 0 20px 0;
-    padding: 20px;
-    background: #f5f5f5;
-    border-radius: 8px;
-}
-
-.qr-codes-section h3 {
-    text-align: center;
-    color: #333;
-    margin-bottom: 15px;
-    font-size: 1.1em;
-}
-
-.qr-codes-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
-    justify-items: center;
-}
-
-.qr-code-item {
-    text-align: center;
-}
-
-.qr-code-item > div {
-    background: white;
-    padding: 10px;
-    border-radius: 8px;
-    display: inline-block;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.qr-code-item p {
-    margin-top: 10px;
-    font-size: 0.85em;
-    color: #666;
-    font-weight: 600;
-}
-
-@media (max-width: 768px) {
-    .qr-codes-grid {
-        grid-template-columns: 1fr;
-        gap: 20px;
-    }
-}
-
 /* ============================================================================
    UI Overlay
    ============================================================================ */

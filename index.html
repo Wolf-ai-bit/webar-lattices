@@ -3,15 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>WebAR Kristallstrukturen - BCC/FCC/HCP</title>
-    <meta name="description" content="Interaktive AR-Visualisierung von Kristallstrukturen: BCC, FCC und HCP mit Atom- und Schematisch-Modi">
+    <title>WebAR Kristallstrukturen - KRZ/KFZ/HDP</title>
+    <meta name="description" content="Interaktive AR-Visualisierung von Kristallstrukturen: KRZ, KFZ und HDP mit Atom- und Schematisch-Modi">
 
     <!-- MindAR + A-Frame -->
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
-
-    <!-- QR Code Generator -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 
     <!-- Styles -->
     <link rel="stylesheet" href="css/style.css">
@@ -37,34 +34,19 @@
                 <li><strong>Erlaube</strong> Kamera-Zugriff</li>
                 <li><strong>Halte</strong> einen AR-Marker vor die Kamera:
                     <ul>
-                        <li> <strong>BCC-Marker</strong> → Kubisch raumzentriert</li>
-                        <li> <strong>FCC-Marker</strong> → Kubisch flächenzentriert</li>
-                        <li> <strong>HCP-Marker</strong> → Hexagonal dichtest gepackt</li>
+                        <li> <strong>KRZ-Marker</strong> → Kubisch raumzentriert</li>
+                        <li> <strong>KFZ-Marker</strong> → Kubisch flächenzentriert</li>
+                        <li> <strong>HDP-Marker</strong> → Hexagonal dichteste Packung</li>
                     </ul>
                 </li>
                 <li><strong>Wechsle</strong> mit dem Button zwischen Atom- und Schematisch-Modus</li>
             </ol>
 
-            <div class="qr-codes-section">
-                <h3>Schnellzugriff mit QR-Code</h3>
-                <div class="qr-codes-grid">
-                    <div class="qr-code-item">
-                        <div id="qrcode-main"></div>
-                        <p>Hauptseite</p>
-                    </div>
-                    <div class="qr-code-item">
-                        <div id="qrcode-bcc"></div>
-                        <p>BCC Marker</p>
-                    </div>
-                    <div class="qr-code-item">
-                        <div id="qrcode-markers"></div>
-                        <p>Alle Marker</p>
-                    </div>
-                </div>
-            </div>
-
             <button id="start-ar-btn">AR starten</button>
-            <p class="note"> Marker nicht verfügbar? <a href="assets/markers/print-markers.html" target="_blank">Hier ausdrucken</a></p>
+            <p class="note">
+                <a href="assets/qr-codes.html" target="_blank">QR-Codes für Mobile-Zugriff</a> |
+                <a href="assets/markers/print-markers.html" target="_blank">Marker ausdrucken</a>
+            </p>
         </div>
     </div>
 
@@ -125,17 +107,17 @@
         id="ar-scene">
 
         <a-assets>
-            <!-- BCC Models - Cache-Busting v14: Ecken=Rot, Zentrum=Blau -->
-            <a-asset-item id="bcc-atom-model" src="assets/models/bcc_atom.glb?v=14"></a-asset-item>
-            <a-asset-item id="bcc-schematic-model" src="assets/models/bcc_schematic.glb?v=14"></a-asset-item>
+            <!-- KRZ Models - Kubisch Raumzentriert: Ecken=Rot, Zentrum=Blau -->
+            <a-asset-item id="krz-atom-model" src="assets/models/bcc_atom.glb?v=14"></a-asset-item>
+            <a-asset-item id="krz-schematic-model" src="assets/models/bcc_schematic.glb?v=14"></a-asset-item>
 
-            <!-- FCC Models - v17: Index 4=Rot, Index 5=Blau (v15 wiederhergestellt) -->
-            <a-asset-item id="fcc-atom-model" src="assets/models/fcc_atom.glb?v=17"></a-asset-item>
-            <a-asset-item id="fcc-schematic-model" src="assets/models/fcc_schematic.glb?v=17"></a-asset-item>
+            <!-- KFZ Models - Kubisch Flächenzentriert: Index 4=Rot, Index 5=Blau -->
+            <a-asset-item id="kfz-atom-model" src="assets/models/fcc_atom.glb?v=17"></a-asset-item>
+            <a-asset-item id="kfz-schematic-model" src="assets/models/fcc_schematic.glb?v=17"></a-asset-item>
 
-            <!-- HCP Models - Unten/Oben=Rot, Mitte=Blau, Mittelschicht zentriert -->
-            <a-asset-item id="hcp-atom-model" src="assets/models/hcp_atom.glb?v=14"></a-asset-item>
-            <a-asset-item id="hcp-schematic-model" src="assets/models/hcp_schematic.glb?v=14"></a-asset-item>
+            <!-- HDP Models - Hexagonal Dichteste Packung: Unten/Oben=Rot, Mitte=Blau -->
+            <a-asset-item id="hdp-atom-model" src="assets/models/hcp_atom.glb?v=14"></a-asset-item>
+            <a-asset-item id="hdp-schematic-model" src="assets/models/hcp_schematic.glb?v=14"></a-asset-item>
         </a-assets>
 
         <!-- Camera -->
@@ -147,12 +129,12 @@
         <a-entity light="type: directional; color: #FFF; intensity: 0.8" position="2 2 -2"></a-entity>
         <a-entity light="type: point; color: #FFF; intensity: 0.5" position="0 2 0"></a-entity>
 
-        <!-- BCC Target (Index 0) -->
-        <a-entity mindar-image-target="targetIndex: 0" id="bcc-target">
-            <a-entity id="bcc-models" position="0 0 0" model-controls>
+        <!-- KRZ Target (Index 0) - Kubisch Raumzentriert -->
+        <a-entity mindar-image-target="targetIndex: 0" id="krz-target">
+            <a-entity id="krz-models" position="0 0 0" model-controls>
                 <a-gltf-model
-                    id="bcc-atom"
-                    src="#bcc-atom-model"
+                    id="krz-atom"
+                    src="#krz-atom-model"
                     position="0 0 0"
                     scale="0.05 0.05 0.05"
                     rotation="0 0 0"
@@ -161,8 +143,8 @@
                 </a-gltf-model>
 
                 <a-gltf-model
-                    id="bcc-schematic"
-                    src="#bcc-schematic-model"
+                    id="krz-schematic"
+                    src="#krz-schematic-model"
                     position="0 0 0"
                     scale="0.05 0.05 0.05"
                     rotation="0 0 0"
@@ -172,12 +154,12 @@
             </a-entity>
         </a-entity>
 
-        <!-- FCC Target (Index 1) -->
-        <a-entity mindar-image-target="targetIndex: 1" id="fcc-target">
-            <a-entity id="fcc-models" position="0 0 0" model-controls>
+        <!-- KFZ Target (Index 1) - Kubisch Flächenzentriert -->
+        <a-entity mindar-image-target="targetIndex: 1" id="kfz-target">
+            <a-entity id="kfz-models" position="0 0 0" model-controls>
                 <a-gltf-model
-                    id="fcc-atom"
-                    src="#fcc-atom-model"
+                    id="kfz-atom"
+                    src="#kfz-atom-model"
                     position="0 0 0"
                     scale="0.05 0.05 0.05"
                     rotation="0 0 0"
@@ -186,8 +168,8 @@
                 </a-gltf-model>
 
                 <a-gltf-model
-                    id="fcc-schematic"
-                    src="#fcc-schematic-model"
+                    id="kfz-schematic"
+                    src="#kfz-schematic-model"
                     position="0 0 0"
                     scale="0.05 0.05 0.05"
                     rotation="0 0 0"
@@ -197,12 +179,12 @@
             </a-entity>
         </a-entity>
 
-        <!-- HCP Target (Index 2) -->
-        <a-entity mindar-image-target="targetIndex: 2" id="hcp-target">
-            <a-entity id="hcp-models" position="0 0 0" model-controls>
+        <!-- HDP Target (Index 2) - Hexagonal Dichteste Packung -->
+        <a-entity mindar-image-target="targetIndex: 2" id="hdp-target">
+            <a-entity id="hdp-models" position="0 0 0" model-controls>
                 <a-gltf-model
-                    id="hcp-atom"
-                    src="#hcp-atom-model"
+                    id="hdp-atom"
+                    src="#hdp-atom-model"
                     position="0 0 0"
                     scale="0.05 0.05 0.05"
                     rotation="0 0 0"
@@ -211,8 +193,8 @@
                 </a-gltf-model>
 
                 <a-gltf-model
-                    id="hcp-schematic"
-                    src="#hcp-schematic-model"
+                    id="hdp-schematic"
+                    src="#hdp-schematic-model"
                     position="0 0 0"
                     scale="0.05 0.05 0.05"
                     rotation="0 0 0"
