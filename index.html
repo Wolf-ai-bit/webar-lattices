@@ -10,6 +10,9 @@
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
 
+    <!-- QR Code Generator -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
     <!-- Styles -->
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -41,6 +44,25 @@
                 </li>
                 <li><strong>Wechsle</strong> mit dem Button zwischen Atom- und Schematisch-Modus</li>
             </ol>
+
+            <div class="qr-codes-section">
+                <h3>Schnellzugriff mit QR-Code</h3>
+                <div class="qr-codes-grid">
+                    <div class="qr-code-item">
+                        <div id="qrcode-main"></div>
+                        <p>Hauptseite</p>
+                    </div>
+                    <div class="qr-code-item">
+                        <div id="qrcode-bcc"></div>
+                        <p>BCC Marker</p>
+                    </div>
+                    <div class="qr-code-item">
+                        <div id="qrcode-markers"></div>
+                        <p>Alle Marker</p>
+                    </div>
+                </div>
+            </div>
+
             <button id="start-ar-btn">AR starten</button>
             <p class="note"> Marker nicht verfügbar? <a href="assets/markers/print-markers.html" target="_blank">Hier ausdrucken</a></p>
         </div>
@@ -74,7 +96,7 @@
 
         <!-- Mode Toggle Button -->
         <button id="mode-toggle" class="mode-toggle hidden">
-            <span class="mode-icon">🔄</span>
+            <span class="mode-icon">↻</span>
             <span class="mode-text">Zu Schematisch wechseln</span>
         </button>
 

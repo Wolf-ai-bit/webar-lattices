@@ -1,4 +1,4 @@
-# 🔬 WebAR Kristallstrukturen
+# WebAR Kristallstrukturen
 
 Interaktive Augmented Reality Visualisierung von Metallgitterstrukturen: **BCC**, **FCC** und **HCP** mit umschaltbaren Darstellungsmodi.
 
@@ -6,7 +6,7 @@ Interaktive Augmented Reality Visualisierung von Metallgitterstrukturen: **BCC**
 
 ---
 
-## 🎯 Features
+## Features
 
 - **3 Kristallstrukturen:**
   - **BCC** (Body-Centered Cubic) - Kubisch raumzentriert
@@ -24,7 +24,7 @@ Interaktive Augmented Reality Visualisierung von Metallgitterstrukturen: **BCC**
 
 ---
 
-## 🚀 Live Demo
+## Live Demo
 
 **GitHub Pages:** [https://Wolf-ai-bit.github.io/webar-lattices](https://Wolf-ai-bit.github.io/webar-lattices)
 
@@ -36,7 +36,7 @@ Interaktive Augmented Reality Visualisierung von Metallgitterstrukturen: **BCC**
 
 ---
 
-## 📦 Projektstruktur
+## Projektstruktur
 
 ```
 webar-lattices/
@@ -64,7 +64,7 @@ webar-lattices/
 
 ---
 
-## 🛠️ Technologie-Stack
+## Technologie-Stack
 
 | Technologie | Version | Zweck |
 |------------|---------|-------|
@@ -76,7 +76,7 @@ webar-lattices/
 
 ---
 
-## 📱 AR-Marker
+## AR-Marker
 
 ### Herunterladen & Ausdrucken
 
@@ -97,7 +97,7 @@ Du kannst die Marker auch am Desktop-Bildschirm anzeigen und mit Smartphone-Kame
 
 ---
 
-## 💻 Lokales Setup
+## Lokales Setup
 
 ### Voraussetzungen
 - Moderner Webbrowser (Chrome, Safari, Firefox)
@@ -141,7 +141,7 @@ Du kannst die Marker auch am Desktop-Bildschirm anzeigen und mit Smartphone-Kame
 
 ---
 
-## 🎮 Verwendung
+## Verwendung
 
 ### Desktop-Testing (ohne AR)
 1. Öffne `index.html` im Browser
@@ -161,7 +161,7 @@ Du kannst die Marker auch am Desktop-Bildschirm anzeigen und mit Smartphone-Kame
 
 ---
 
-## 🔧 Entwicklung
+## Entwicklung
 
 ### Ordner-Struktur Konventionen
 
@@ -206,7 +206,7 @@ Du kannst die Marker auch am Desktop-Bildschirm anzeigen und mit Smartphone-Kame
 
 ---
 
-## 📐 3D-Modell-Spezifikationen
+## 3D-Modell-Spezifikationen
 
 ### Geometrie-Parameter
 
@@ -241,7 +241,7 @@ cp glb_output/*.glb ../webar-lattices/assets/models/
 
 ---
 
-## 🚢 Deployment auf GitHub Pages
+## Deployment auf GitHub Pages
 
 ### Setup
 
@@ -269,26 +269,26 @@ cp glb_output/*.glb ../webar-lattices/assets/models/
 
 ### Wichtige Hinweise für GitHub Pages
 
-- ✅ Alle Pfade müssen **relativ** sein (kein `/assets/`, sondern `assets/`)
-- ✅ HTTPS ist automatisch aktiviert (wichtig für WebAR!)
-- ✅ Große Dateien (> 100 MB) mit Git LFS verwalten
-- ✅ `.nojekyll` Datei erstellen (falls Jekyll-Probleme)
+- Alle Pfade müssen **relativ** sein (kein `/assets/`, sondern `assets/`)
+- HTTPS ist automatisch aktiviert (wichtig für WebAR!)
+- Große Dateien (> 100 MB) mit Git LFS verwalten
+- `.nojekyll` Datei erstellen (falls Jekyll-Probleme)
 
 ---
 
-## 🧪 Testing
+## Testing
 
 ### Desktop-Browser
-- ✅ Chrome 90+ (empfohlen)
-- ✅ Firefox 88+
-- ✅ Safari 14+ (macOS)
-- ⚠️ Edge (Chromium-basiert funktioniert)
+- Chrome 90+ (empfohlen)
+- Firefox 88+
+- Safari 14+ (macOS)
+- Edge (Chromium-basiert funktioniert)
 
 ### Mobile-Browser
-- ✅ Chrome Android 90+
-- ✅ Safari iOS 14.3+
-- ⚠️ Samsung Internet (limitiert)
-- ❌ In-App Browser (z.B. Instagram, Facebook)
+- Chrome Android 90+
+- Safari iOS 14.3+
+- Samsung Internet (limitiert)
+- In-App Browser (z.B. Instagram, Facebook) funktioniert nicht
 
 ### Marker-Tracking Qualität
 - **Sehr gut:** Gedruckte Marker (matt, nicht glänzend)
@@ -298,7 +298,7 @@ cp glb_output/*.glb ../webar-lattices/assets/models/
 
 ---
 
-## ❓ Troubleshooting
+## Troubleshooting
 
 ### Problem: Kamera-Zugriff verweigert
 
@@ -342,7 +342,7 @@ cp glb_output/*.glb ../webar-lattices/assets/models/
 
 ---
 
-## 📚 Ressourcen & Links
+## Ressourcen & Links
 
 ### Dokumentation
 - **MindAR:** https://hiukim.github.io/mind-ar-js-doc/
@@ -361,7 +361,7 @@ cp glb_output/*.glb ../webar-lattices/assets/models/
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Beiträge sind willkommen! Bitte erstelle einen Pull Request für:
 - Neue Kristallstrukturen
@@ -372,7 +372,7 @@ Beiträge sind willkommen! Bitte erstelle einen Pull Request für:
 
 ---
 
-## 📄 Lizenz
+## Lizenz
 
 Dieses Projekt ist frei verfügbar für Bildungszwecke.
 
@@ -383,7 +383,7 @@ Dieses Projekt ist frei verfügbar für Bildungszwecke.
 
 ---
 
-## 👤 Autoren
+## Autoren
 
 **AR-Lattices WebAR Project**
 - GitHub: [@Wolf-ai-bit](https://github.com/Wolf-ai-bit)
@@ -391,7 +391,7 @@ Dieses Projekt ist frei verfügbar für Bildungszwecke.
 
 ---
 
-## 🙏 Danksagungen
+## Danksagungen
 
 - MindAR Team für exzellentes AR-Framework
 - A-Frame Community für WebVR/AR-Tools
@@ -401,4 +401,4 @@ Dieses Projekt ist frei verfügbar für Bildungszwecke.
 
 **Version:** 1.0.0
 **Letztes Update:** 2025
-**Status:** ✅ Production Ready
+**Status:** Production Ready

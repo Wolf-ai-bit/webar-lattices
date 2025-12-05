@@ -1,14 +1,14 @@
-# 🚀 Deployment Guide - WebAR Kristallstrukturen
+# Deployment Guide - WebAR Kristallstrukturen
 
 Komplette Anleitung zum Deployment auf GitHub Pages.
 
 ---
 
-## 📋 Voraussetzungen
+## Voraussetzungen
 
 Bevor du deployest, stelle sicher, dass folgende Dateien existieren:
 
-### ✅ Checkliste
+### Checkliste
 
 - [ ] **GLB-Modelle** (6 Dateien in `assets/models/`):
   - `bcc_atom.glb`
@@ -35,7 +35,7 @@ Bevor du deployest, stelle sicher, dass folgende Dateien existieren:
 
 ---
 
-## 🛠️ Schritt 1: GLB-Modelle erstellen
+## Schritt 1: GLB-Modelle erstellen
 
 Falls noch nicht geschehen, erstelle die GLB-Modelle aus ar-lattices:
 
@@ -80,7 +80,7 @@ Erwartete Ausgabe: **6 GLB-Dateien**, jeweils < 2 MB
 
 ---
 
-## 🎯 Schritt 2: AR-Marker erstellen
+## Schritt 2: AR-Marker erstellen
 
 ### A) Marker-Bilder designen
 
@@ -118,7 +118,7 @@ mind-ar-cli compile \
 
 ---
 
-## 📦 Schritt 3: Git Repository einrichten
+## Schritt 3: Git Repository einrichten
 
 ### A) Git initialisieren (falls noch nicht geschehen)
 
@@ -162,7 +162,7 @@ git commit -m "Initial commit: WebAR Kristallstrukturen
 
 ---
 
-## 🌐 Schritt 4: GitHub Repository erstellen
+## Schritt 4: GitHub Repository erstellen
 
 ### A) Auf GitHub
 
@@ -187,7 +187,7 @@ git push -u origin main
 
 ---
 
-## 🚀 Schritt 5: GitHub Pages aktivieren
+## Schritt 5: GitHub Pages aktivieren
 
 ### A) Settings konfigurieren
 
@@ -201,8 +201,8 @@ git push -u origin main
 
 - **Dauer:** 1-3 Minuten
 - **Status:** Prüfe oben auf der Pages-Seite:
-  - 🔵 "Your site is ready to be published" → Warte noch
-  - 🟢 "Your site is published" → Fertig!
+  - "Your site is ready to be published" → Warte noch
+  - "Your site is published" → Fertig!
 
 ### C) URL öffnen
 
@@ -219,7 +219,7 @@ https://Wolf-ai-bit.github.io/webar-lattices
 
 ---
 
-## 🧪 Schritt 6: Testing
+## Schritt 6: Testing
 
 ### Desktop-Testing
 
@@ -258,7 +258,7 @@ https://Wolf-ai-bit.github.io/webar-lattices
 
 ---
 
-## 🔧 Schritt 7: Optimierungen (Optional)
+## Schritt 7: Optimierungen (Optional)
 
 ### A) Custom Domain einrichten
 
@@ -306,7 +306,7 @@ Google Analytics oder Plausible hinzufügen für Besucherstatistik:
 
 ---
 
-## 📊 Schritt 8: Monitoring & Maintenance
+## Schritt 8: Monitoring & Maintenance
 
 ### A) GitHub Actions (CI/CD)
 
@@ -356,14 +356,14 @@ GitHub Pages aktualisiert automatisch (1-2 Minuten).
 
 ---
 
-## 🎉 Schritt 9: Dokumentation finalisieren
+## Schritt 9: Dokumentation finalisieren
 
 ### README.md aktualisieren
 
 Füge Live-Demo-Link hinzu:
 
 ```markdown
-## 🚀 Live Demo
+## Live Demo
 
 **GitHub Pages:** [https://Wolf-ai-bit.github.io/webar-lattices](https://Wolf-ai-bit.github.io/webar-lattices)
 ```
@@ -377,13 +377,13 @@ Füge Live-Demo-Link hinzu:
 4. Speichere als `assets/preview.png`
 
 **Teilen:**
-- Twitter/X: "WebAR Kristallstrukturen live! 🔬✨ [Link]"
+- Twitter/X: "WebAR Kristallstrukturen live! [Link]"
 - LinkedIn: "Neue WebAR-Visualisierung von Metallgittern..."
 - Reddit: r/webdev, r/augmentedreality
 
 ---
 
-## ❓ Troubleshooting
+## Troubleshooting
 
 ### Problem: GitHub Pages zeigt 404
 
@@ -429,31 +429,31 @@ git push
 
 ---
 
-## 📈 Erfolgsmetriken
+## Erfolgsmetriken
 
 Nach erfolgreichem Deployment sollte:
 
-✅ **Live-Demo funktionieren:**
+**Live-Demo funktionieren:**
 - https://Wolf-ai-bit.github.io/webar-lattices öffnet sich
 
-✅ **Kamera-Zugriff funktionieren:**
+**Kamera-Zugriff funktionieren:**
 - Browser fragt nach Berechtigung
 - Kamera-Feed wird angezeigt
 
-✅ **AR-Tracking funktionieren:**
+**AR-Tracking funktionieren:**
 - Marker werden erkannt (< 1 Sekunde)
 - 3D-Modelle erscheinen stabil über Marker
 
-✅ **Mode-Toggle funktionieren:**
+**Mode-Toggle funktionieren:**
 - Umschalten zwischen Atom/Schematic ohne Ruckeln
 
-✅ **Mobile-Kompatibilität:**
+**Mobile-Kompatibilität:**
 - iOS Safari 14.3+
 - Android Chrome 90+
 
 ---
 
-## 🔗 Nützliche Links
+## Nützliche Links
 
 - **GitHub Pages Docs:** https://docs.github.com/en/pages
 - **MindAR Docs:** https://hiukim.github.io/mind-ar-js-doc/
@@ -461,7 +461,7 @@ Nach erfolgreichem Deployment sollte:
 
 ---
 
-## ✅ Finale Checkliste
+## Finale Checkliste
 
 - [ ] Alle GLB-Modelle hochgeladen (6 Dateien)
 - [ ] `targets.mind` erstellt und hochgeladen
@@ -476,7 +476,7 @@ Nach erfolgreichem Deployment sollte:
 
 ---
 
-**Glückwunsch! 🎉**
+**Glückwunsch!**
 
 Dein WebAR-Projekt ist jetzt live unter:
 **https://Wolf-ai-bit.github.io/webar-lattices**

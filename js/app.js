@@ -71,6 +71,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Progress Bar Animation (simuliert)
     simulateLoading();
+
+    // QR-Codes generieren
+    generateQRCodes();
 });
 
 /**
@@ -386,6 +389,53 @@ window.debugWebAR = () => {
 
 // Console-Hinweis für Entwickler
 console.log('[WebAR] Debugging verfügbar: window.debugWebAR()');
+
+// ============================================================================
+// QR CODE GENERATION
+// ============================================================================
+
+/**
+ * Generiert QR-Codes für schnellen Zugriff auf die Webseite
+ */
+function generateQRCodes() {
+    const baseURL = 'https://wolf-ai-bit.github.io/webar-lattices';
+
+    try {
+        // QR-Code für Hauptseite
+        new QRCode(document.getElementById('qrcode-main'), {
+            text: baseURL,
+            width: 100,
+            height: 100,
+            colorDark: '#667eea',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.M
+        });
+
+        // QR-Code für BCC Marker
+        new QRCode(document.getElementById('qrcode-bcc'), {
+            text: `${baseURL}/assets/markers/marker_bcc.png`,
+            width: 100,
+            height: 100,
+            colorDark: '#667eea',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.M
+        });
+
+        // QR-Code für Marker-Druckseite
+        new QRCode(document.getElementById('qrcode-markers'), {
+            text: `${baseURL}/assets/markers/print-markers.html`,
+            width: 100,
+            height: 100,
+            colorDark: '#667eea',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.M
+        });
+
+        console.log('[WebAR] QR-Codes erfolgreich generiert');
+    } catch (error) {
+        console.error('[WebAR] Fehler beim Generieren der QR-Codes:', error);
+    }
+}
 
 // ============================================================================
 // FEHLERBEHANDLUNG
