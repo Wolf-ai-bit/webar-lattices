@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR-Codes - WebAR Kristallstrukturen</title>
+    <title>AR-Marker - WebAR Kristallstrukturen</title>
     <style>
         * {
             margin: 0;
@@ -25,7 +25,7 @@
             background: white;
             border-radius: 20px;
             padding: 40px;
-            max-width: 900px;
+            max-width: 1200px;
             width: 100%;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
@@ -64,14 +64,18 @@
             color: #555;
         }
 
-        .qr-grid {
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        .marker-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 30px;
             margin-bottom: 30px;
         }
 
-        .qr-card {
+        .marker-card {
             text-align: center;
             padding: 25px;
             background: #f9f9f9;
@@ -79,24 +83,24 @@
             transition: transform 0.3s, box-shadow 0.3s;
         }
 
-        .qr-card:hover {
+        .marker-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
         }
 
-        .qr-card h3 {
+        .marker-card h3 {
             color: #667eea;
             margin-bottom: 10px;
             font-size: 1.3em;
         }
 
-        .qr-card .structure-type {
+        .marker-card .structure-type {
             color: #888;
             font-size: 0.9em;
             margin-bottom: 20px;
         }
 
-        .qr-code-wrapper {
+        .marker-image-wrapper {
             background: white;
             padding: 15px;
             border-radius: 8px;
@@ -105,7 +109,15 @@
             margin-bottom: 15px;
         }
 
-        .qr-info {
+        .marker-image-wrapper img {
+            width: 100%;
+            max-width: 300px;
+            height: auto;
+            display: block;
+            border-radius: 4px;
+        }
+
+        .marker-info {
             background: white;
             padding: 15px;
             border-radius: 8px;
@@ -115,7 +127,11 @@
             text-align: left;
         }
 
-        .qr-info strong {
+        .marker-info p {
+            margin-bottom: 8px;
+        }
+
+        .marker-info strong {
             color: #333;
         }
 
@@ -149,67 +165,83 @@
                 font-size: 1.5em;
             }
 
-            .qr-grid {
+            .marker-grid {
                 grid-template-columns: 1fr;
             }
         }
-    </style>
 
-    <!-- QR Code Generator -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+        @media print {
+            body {
+                background: white;
+            }
+
+            .container {
+                box-shadow: none;
+            }
+
+            .instructions,
+            .back-button {
+                display: none;
+            }
+
+            .marker-card {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>AR-Marker QR-Codes</h1>
-        <p class="subtitle">Scanne die QR-Codes, um die AR-Marker anzuzeigen</p>
+        <h1>AR-Marker</h1>
+        <p class="subtitle">Verwende diese Marker für die AR-Visualisierung</p>
 
         <div class="instructions">
             <h2>Anleitung</h2>
             <ol>
-                <li><strong>Öffne</strong> diese Seite auf einem Desktop/Laptop</li>
-                <li><strong>Scanne</strong> einen der QR-Codes mit deinem Smartphone</li>
-                <li><strong>Der Marker</strong> wird auf deinem Smartphone angezeigt</li>
-                <li><strong>Öffne</strong> die WebAR-Seite auf einem zweiten Gerät</li>
-                <li><strong>Halte</strong> das zweite Gerät vor den Marker auf dem ersten Gerät</li>
+                <li><strong>Option 1 - Ausdrucken:</strong> Drucke diese Seite aus (Strg+P) für physische Marker</li>
+                <li><strong>Option 2 - Bildschirm:</strong> Zeige einen Marker auf diesem Gerät und scanne mit einem zweiten Gerät</li>
+                <li><strong>Öffne</strong> die WebAR-Seite auf dem Gerät mit der Kamera</li>
+                <li><strong>Klicke</strong> auf "AR starten" und erlaube Kamera-Zugriff</li>
+                <li><strong>Richte</strong> die Kamera auf einen der Marker</li>
                 <li><strong>Das 3D-Modell</strong> erscheint über dem Marker</li>
             </ol>
         </div>
 
-        <div class="qr-grid">
+        <div class="marker-grid">
             <!-- KRZ Marker -->
-            <div class="qr-card">
+            <div class="marker-card">
                 <h3>KRZ-Marker</h3>
                 <p class="structure-type">Kubisch Raumzentriert</p>
-                <div class="qr-code-wrapper">
-                    <div id="qrcode-krz"></div>
+                <div class="marker-image-wrapper">
+                    <img src="markers/marker_krz.png" alt="KRZ Marker - Kubisch Raumzentriert">
                 </div>
-                <div class="qr-info">
+                <div class="marker-info">
                     <p><strong>Struktur:</strong> 9 Atome</p>
                     <p><strong>Beschreibung:</strong> 8 Eckatome + 1 Zentralatom</p>
                 </div>
             </div>
 
             <!-- KFZ Marker -->
-            <div class="qr-card">
+            <div class="marker-card">
                 <h3>KFZ-Marker</h3>
                 <p class="structure-type">Kubisch Flächenzentriert</p>
-                <div class="qr-code-wrapper">
-                    <div id="qrcode-kfz"></div>
+                <div class="marker-image-wrapper">
+                    <img src="markers/marker_kfz.png" alt="KFZ Marker - Kubisch Flächenzentriert">
                 </div>
-                <div class="qr-info">
+                <div class="marker-info">
                     <p><strong>Struktur:</strong> 14 Atome</p>
                     <p><strong>Beschreibung:</strong> 8 Eckatome + 6 Flächenatome</p>
                 </div>
             </div>
 
             <!-- HDP Marker -->
-            <div class="qr-card">
+            <div class="marker-card">
                 <h3>HDP-Marker</h3>
                 <p class="structure-type">Hexagonal Dichteste Packung</p>
-                <div class="qr-code-wrapper">
-                    <div id="qrcode-hdp"></div>
+                <div class="marker-image-wrapper">
+                    <img src="markers/marker_hdp.png" alt="HDP Marker - Hexagonal Dichteste Packung">
                 </div>
-                <div class="qr-info">
+                <div class="marker-info">
                     <p><strong>Struktur:</strong> 17 Atome</p>
                     <p><strong>Beschreibung:</strong> 12 Hexagon + 2 Zentren + 3 Mitte</p>
                 </div>
@@ -218,42 +250,5 @@
 
         <a href="../index.html" class="back-button">Zurück zur Hauptseite</a>
     </div>
-
-    <script>
-        // Basis-URL für die Marker
-        const baseURL = 'https://wolf-ai-bit.github.io/webar-lattices';
-
-        // QR-Code für KRZ Marker
-        new QRCode(document.getElementById('qrcode-krz'), {
-            text: `${baseURL}/assets/markers/marker_krz.png`,
-            width: 180,
-            height: 180,
-            colorDark: '#667eea',
-            colorLight: '#ffffff',
-            correctLevel: QRCode.CorrectLevel.H
-        });
-
-        // QR-Code für KFZ Marker
-        new QRCode(document.getElementById('qrcode-kfz'), {
-            text: `${baseURL}/assets/markers/marker_kfz.png`,
-            width: 180,
-            height: 180,
-            colorDark: '#667eea',
-            colorLight: '#ffffff',
-            correctLevel: QRCode.CorrectLevel.H
-        });
-
-        // QR-Code für HDP Marker
-        new QRCode(document.getElementById('qrcode-hdp'), {
-            text: `${baseURL}/assets/markers/marker_hdp.png`,
-            width: 180,
-            height: 180,
-            colorDark: '#667eea',
-            colorLight: '#ffffff',
-            correctLevel: QRCode.CorrectLevel.H
-        });
-
-        console.log('[QR-Codes] Alle QR-Codes erfolgreich generiert');
-    </script>
 </body>
 </html>
