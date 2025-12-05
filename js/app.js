@@ -415,23 +415,26 @@ function enterFreeMode(structureType) {
 
     appState.freeMode = true;
 
-    // Finde alle Modelle der Struktur
+    // Finde das SICHTBARE Modell der Struktur
     const atomModel = document.getElementById(`${structureType}-atom`);
     const schematicModel = document.getElementById(`${structureType}-schematic`);
 
-    // Aktiviere free-mode Component
-    if (atomModel && atomModel.hasAttribute('visible') && atomModel.getAttribute('visible') === 'true') {
-        atomModel.setAttribute('free-mode', {
-            enabled: true,
-            structureType: structureType
-        });
+    // Aktiviere free-mode Component nur für das SICHTBARE Modell
+    // Dies verhindert doppeltes Bewegen des Containers
+    let visibleModel = null;
+
+    if (atomModel && atomModel.getAttribute('visible') === 'true') {
+        visibleModel = atomModel;
+    } else if (schematicModel && schematicModel.getAttribute('visible') === 'true') {
+        visibleModel = schematicModel;
     }
 
-    if (schematicModel && schematicModel.hasAttribute('visible') && schematicModel.getAttribute('visible') === 'true') {
-        schematicModel.setAttribute('free-mode', {
+    if (visibleModel) {
+        visibleModel.setAttribute('free-mode', {
             enabled: true,
             structureType: structureType
         });
+        console.log(`[WebAR] Free Mode aktiviert für Modell: ${visibleModel.id}`);
     }
 
     updateStatus(`${structureInfo[structureType].name} - Frei drehbar`, true);
@@ -448,7 +451,8 @@ function exitFreeMode(structureType) {
     const atomModel = document.getElementById(`${structureType}-atom`);
     const schematicModel = document.getElementById(`${structureType}-schematic`);
 
-    // Deaktiviere free-mode Component
+    // Deaktiviere free-mode Component für beide Modelle
+    // Aber nur eines davon hatte es wirklich aktiviert (das sichtbare)
     if (atomModel) {
         atomModel.setAttribute('free-mode', { enabled: false });
     }

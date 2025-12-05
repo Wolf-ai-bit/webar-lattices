@@ -48,37 +48,51 @@ AFRAME.registerComponent('free-mode', {
 
         console.log('[FreeMode] Aktiviere Free Mode für:', this.data.structureType);
 
-        // Speichere aktuelle Welt-Position
+        // Finde den models-Container (Eltern-Element des Modells)
+        let modelsContainer = this.el.parentElement;
+
+        // Gehe eine Ebene höher falls nötig (manchmal ist das Modell direkt im Target)
+        if (!modelsContainer.id.includes('models')) {
+            modelsContainer = modelsContainer.parentElement;
+        }
+
+        console.log('[FreeMode] Models Container:', modelsContainer.id);
+
+        // Speichere aktuelle Welt-Position des Containers
         const worldPosition = new THREE.Vector3();
-        this.el.object3D.getWorldPosition(worldPosition);
+        modelsContainer.object3D.getWorldPosition(worldPosition);
 
         const worldQuaternion = new THREE.Quaternion();
-        this.el.object3D.getWorldQuaternion(worldQuaternion);
+        modelsContainer.object3D.getWorldQuaternion(worldQuaternion);
 
         const worldScale = new THREE.Vector3();
-        this.el.object3D.getWorldScale(worldScale);
+        modelsContainer.object3D.getWorldScale(worldScale);
 
         // Erstelle Container für freies Modell (nicht an Marker gebunden)
         this.freeContainer = document.createElement('a-entity');
-        this.freeContainer.setAttribute('id', `free-${this.data.structureType}`);
+        this.freeContainer.setAttribute('id', `free-${this.data.structureType}-container`);
         this.freeContainer.object3D.position.copy(worldPosition);
         this.freeContainer.object3D.quaternion.copy(worldQuaternion);
         this.freeContainer.object3D.scale.copy(worldScale);
 
-        // Bewege Modell in Free Container
-        this.originalParent = this.el.parentElement;
-        this.freeContainer.appendChild(this.el);
+        // Speichere Original-Parent
+        this.originalParent = modelsContainer.parentElement;
+
+        // Bewege GESAMTEN models-Container in Free Container
+        this.freeContainer.appendChild(modelsContainer);
 
         // Füge Free Container zur Scene hinzu (nicht zum Target!)
         const scene = document.querySelector('a-scene');
         scene.appendChild(this.freeContainer);
 
         this.isInFreeMode = true;
+        this.movedContainer = modelsContainer;
 
         // Aktiviere Touch-Gesten
         this.enableTouchGestures();
 
         console.log('[FreeMode] Free Mode aktiviert, Position:', worldPosition);
+        console.log('[FreeMode] Moved Container:', this.movedContainer.id);
     },
 
     /**
@@ -92,9 +106,9 @@ AFRAME.registerComponent('free-mode', {
         // Deaktiviere Touch-Gesten
         this.disableTouchGestures();
 
-        // Bewege Modell zurück zum Original-Parent
-        if (this.originalParent) {
-            this.originalParent.appendChild(this.el);
+        // Bewege models-Container zurück zum Original-Parent (Target)
+        if (this.originalParent && this.movedContainer) {
+            this.originalParent.appendChild(this.movedContainer);
         }
 
         // Entferne Free Container
@@ -103,6 +117,7 @@ AFRAME.registerComponent('free-mode', {
         }
 
         this.freeContainer = null;
+        this.movedContainer = null;
         this.isInFreeMode = false;
 
         // Rotations-State zurücksetzen
