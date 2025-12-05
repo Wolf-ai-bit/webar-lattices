@@ -39,7 +39,10 @@
                         <li> <strong>HDP-Marker</strong> → Hexagonal dichteste Packung</li>
                     </ul>
                 </li>
+                <li><strong>Das Modell</strong> bleibt nach dem Scan sichtbar - auch ohne Marker</li>
+                <li><strong>Drehe</strong> das Modell mit dem Finger (Touch & Drag)</li>
                 <li><strong>Wechsle</strong> mit dem Button zwischen Atom- und Schematisch-Modus</li>
+                <li><strong>Scanne</strong> einen neuen Marker um die Struktur zu wechseln</li>
             </ol>
 
             <button id="start-ar-btn">AR starten</button>
@@ -93,6 +96,9 @@
     <!-- Model Controls Component -->
     <script src="js/model-controls.js"></script>
 
+    <!-- Free Mode Component (Persistente Modelle mit Touch-Rotation) -->
+    <script src="js/free-mode.js"></script>
+
     <!-- GLTF Multi-Mesh Component (Fix für A-Frame's single-mesh rendering) -->
     <script src="js/gltf-multi-mesh.js"></script>
 
@@ -138,7 +144,8 @@
                     scale="0.05 0.05 0.05"
                     rotation="0 0 0"
                     visible="true"
-                    gltf-multi-mesh>
+                    gltf-multi-mesh
+                    free-mode="enabled: false; structureType: krz">
                 </a-gltf-model>
 
                 <a-gltf-model
@@ -148,7 +155,8 @@
                     scale="0.05 0.05 0.05"
                     rotation="0 0 0"
                     visible="false"
-                    gltf-multi-mesh>
+                    gltf-multi-mesh
+                    free-mode="enabled: false; structureType: krz">
                 </a-gltf-model>
             </a-entity>
         </a-entity>
@@ -163,7 +171,8 @@
                     scale="0.05 0.05 0.05"
                     rotation="0 0 0"
                     visible="true"
-                    gltf-multi-mesh>
+                    gltf-multi-mesh
+                    free-mode="enabled: false; structureType: kfz">
                 </a-gltf-model>
 
                 <a-gltf-model
@@ -173,7 +182,8 @@
                     scale="0.05 0.05 0.05"
                     rotation="0 0 0"
                     visible="false"
-                    gltf-multi-mesh>
+                    gltf-multi-mesh
+                    free-mode="enabled: false; structureType: kfz">
                 </a-gltf-model>
             </a-entity>
         </a-entity>
@@ -188,7 +198,8 @@
                     scale="0.05 0.05 0.05"
                     rotation="0 0 0"
                     visible="true"
-                    gltf-multi-mesh>
+                    gltf-multi-mesh
+                    free-mode="enabled: false; structureType: hdp">
                 </a-gltf-model>
 
                 <a-gltf-model
@@ -198,7 +209,8 @@
                     scale="0.05 0.05 0.05"
                     rotation="0 0 0"
                     visible="false"
-                    gltf-multi-mesh>
+                    gltf-multi-mesh
+                    free-mode="enabled: false; structureType: hdp">
                 </a-gltf-model>
             </a-entity>
         </a-entity>

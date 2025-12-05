@@ -11,8 +11,10 @@
 const appState = {
     currentMode: 'atom',           // 'atom' oder 'schematic'
     activeTarget: null,             // null, 'krz', 'kfz', 'hdp'
+    activeStructure: null,          // null, 'krz', 'kfz', 'hdp' (für Free Mode)
     arReady: false,
-    trackingActive: false
+    trackingActive: false,
+    freeMode: false                 // Free Mode aktiviert
 };
 
 // Struktur-Informationen
@@ -203,13 +205,20 @@ function setupTargetTracking(structureType, targetIndex) {
  * Wird aufgerufen, wenn ein Marker erkannt wird
  */
 function onTargetFound(structureType) {
+    // WICHTIG: Wenn bereits eine Struktur im Free Mode ist, verstecke sie komplett
+    if (appState.activeStructure && appState.activeStructure !== structureType) {
+        console.log(`[WebAR] Wechsle von ${appState.activeStructure.toUpperCase()} zu ${structureType.toUpperCase()}`);
+        exitFreeMode(appState.activeStructure);
+        hideAllModels();
+    }
+
     // Verstecke vorheriges Modell falls ein anderer Marker aktiv war
     if (appState.activeTarget && appState.activeTarget !== structureType) {
-        console.log(`[WebAR] Wechsle von ${appState.activeTarget.toUpperCase()} zu ${structureType.toUpperCase()}`);
         hideAllModels();
     }
 
     appState.activeTarget = structureType;
+    appState.activeStructure = structureType;
     appState.trackingActive = true;
 
     // UI aktualisieren
@@ -222,6 +231,13 @@ function onTargetFound(structureType) {
 
     // Zeige aktuelles Modell basierend auf Modus
     updateModelVisibility(structureType);
+
+    // Nach kurzer Verzögerung in Free Mode wechseln (1 Sekunde)
+    setTimeout(() => {
+        if (appState.activeTarget === structureType) {
+            enterFreeMode(structureType);
+        }
+    }, 1000);
 }
 
 /**
@@ -386,6 +402,74 @@ window.debugWebAR = () => {
 
 // Console-Hinweis für Entwickler
 console.log('[WebAR] Debugging verfügbar: window.debugWebAR()');
+
+// ============================================================================
+// FREE MODE FUNKTIONEN
+// ============================================================================
+
+/**
+ * Aktiviert Free Mode für eine Struktur
+ */
+function enterFreeMode(structureType) {
+    console.log(`[WebAR] Aktiviere Free Mode für: ${structureType}`);
+
+    appState.freeMode = true;
+
+    // Finde alle Modelle der Struktur
+    const atomModel = document.getElementById(`${structureType}-atom`);
+    const schematicModel = document.getElementById(`${structureType}-schematic`);
+
+    // Aktiviere free-mode Component
+    if (atomModel && atomModel.hasAttribute('visible') && atomModel.getAttribute('visible') === 'true') {
+        atomModel.setAttribute('free-mode', {
+            enabled: true,
+            structureType: structureType
+        });
+    }
+
+    if (schematicModel && schematicModel.hasAttribute('visible') && schematicModel.getAttribute('visible') === 'true') {
+        schematicModel.setAttribute('free-mode', {
+            enabled: true,
+            structureType: structureType
+        });
+    }
+
+    updateStatus(`${structureInfo[structureType].name} - Frei drehbar`, true);
+}
+
+/**
+ * Deaktiviert Free Mode für eine Struktur
+ */
+function exitFreeMode(structureType) {
+    console.log(`[WebAR] Deaktiviere Free Mode für: ${structureType}`);
+
+    appState.freeMode = false;
+
+    const atomModel = document.getElementById(`${structureType}-atom`);
+    const schematicModel = document.getElementById(`${structureType}-schematic`);
+
+    // Deaktiviere free-mode Component
+    if (atomModel) {
+        atomModel.setAttribute('free-mode', { enabled: false });
+    }
+
+    if (schematicModel) {
+        schematicModel.setAttribute('free-mode', { enabled: false });
+    }
+}
+
+/**
+ * Versteckt eine bestimmte Struktur komplett
+ */
+function hideStructure(structureType) {
+    console.log(`[WebAR] Verstecke Struktur: ${structureType}`);
+
+    const atomModel = document.getElementById(`${structureType}-atom`);
+    const schematicModel = document.getElementById(`${structureType}-schematic`);
+
+    if (atomModel) atomModel.setAttribute('visible', 'false');
+    if (schematicModel) schematicModel.setAttribute('visible', 'false');
+}
 
 // ============================================================================
 // FEHLERBEHANDLUNG
