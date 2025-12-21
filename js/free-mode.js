@@ -3,7 +3,7 @@
  *
  * CAMERA-RELATIVE TRACKING:
  * - Beim Marker-Scan: Distanz zur Kamera wird gemessen
- * - Bei Marker-Verlust: Modell bleibt in dieser Distanz vor der Kamera
+ * - Modell wird SOFORT zur Kamera verschoben
  * - Touch-Gesten: Drehen und Zoomen (Pinch)
  */
 
@@ -113,11 +113,35 @@ AFRAME.registerComponent('free-mode', {
         this.isInFreeMode = true;
         this.movedContainer = modelsContainer;
 
+        // WICHTIG: Stelle SOFORT sicher, dass Modelle sichtbar sind
+        this.forceVisibility();
+
         // Aktiviere Touch-Gesten
         this.enableTouchGestures();
 
         console.log('[FreeMode] Camera-Relative Mode aktiviert');
         console.log('[FreeMode] Position vor Kamera:', `0, 0, -${this.savedDistance}`);
+    },
+
+    /**
+     * Erzwingt Sichtbarkeit der Modelle SOFORT
+     */
+    forceVisibility: function () {
+        if (!this.movedContainer) return;
+
+        // Finde alle Modelle im Container
+        const allModels = this.movedContainer.querySelectorAll('a-gltf-model');
+
+        allModels.forEach(model => {
+            const visible = model.getAttribute('visible');
+            if (visible === 'true' || visible === true) {
+                // Setze explizit auf sichtbar
+                model.setAttribute('visible', 'true');
+                model.object3D.visible = true;
+
+                console.log('[FreeMode] Force Visibility für:', model.id, '✓');
+            }
+        });
     },
 
     /**

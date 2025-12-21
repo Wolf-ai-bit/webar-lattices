@@ -233,12 +233,8 @@ function onTargetFound(structureType) {
     // Zeige aktuelles Modell basierend auf Modus
     updateModelVisibility(structureType);
 
-    // Nach kurzer Verzögerung in Camera-Relative Mode wechseln (1 Sekunde)
-    setTimeout(() => {
-        if (appState.activeTarget === structureType) {
-            enterFreeMode(structureType);
-        }
-    }, 1000);
+    // SOFORT in Camera-Relative Mode wechseln (keine Verzögerung!)
+    enterFreeMode(structureType);
 }
 
 /**
@@ -456,7 +452,7 @@ function startVisibilityWatcher(structureType) {
         clearInterval(visibilityWatcherInterval);
     }
 
-    // Starte neuen Watcher
+    // Starte neuen Watcher (SEHR AGGRESSIV - alle 50ms!)
     visibilityWatcherInterval = setInterval(() => {
         if (appState.freeMode && appState.activeStructure === structureType) {
             const atomModel = document.getElementById(`${structureType}-atom`);
@@ -464,18 +460,28 @@ function startVisibilityWatcher(structureType) {
 
             // Stelle sicher, dass das aktive Modell sichtbar ist
             if (appState.currentMode === 'atom' && atomModel) {
-                if (atomModel.getAttribute('visible') !== 'true') {
-                    console.log(`[WebAR] Visibility Watcher: Setze ${structureType}-atom auf visible`);
-                    atomModel.setAttribute('visible', 'true');
+                // Setze BEIDE Attribute (A-Frame + THREE.js)
+                atomModel.setAttribute('visible', 'true');
+                if (atomModel.object3D) atomModel.object3D.visible = true;
+
+                // Verstecke schematic explizit
+                if (schematicModel) {
+                    schematicModel.setAttribute('visible', 'false');
+                    if (schematicModel.object3D) schematicModel.object3D.visible = false;
                 }
             } else if (appState.currentMode === 'schematic' && schematicModel) {
-                if (schematicModel.getAttribute('visible') !== 'true') {
-                    console.log(`[WebAR] Visibility Watcher: Setze ${structureType}-schematic auf visible`);
-                    schematicModel.setAttribute('visible', 'true');
+                // Setze BEIDE Attribute (A-Frame + THREE.js)
+                schematicModel.setAttribute('visible', 'true');
+                if (schematicModel.object3D) schematicModel.object3D.visible = true;
+
+                // Verstecke atom explizit
+                if (atomModel) {
+                    atomModel.setAttribute('visible', 'false');
+                    if (atomModel.object3D) atomModel.object3D.visible = false;
                 }
             }
         }
-    }, 200); // Prüfe alle 200ms
+    }, 50); // Prüfe alle 50ms (sehr aggressiv!)
 }
 
 function stopVisibilityWatcher() {
