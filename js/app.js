@@ -301,30 +301,34 @@ function toggleMode() {
 
     // Modell-Sichtbarkeit für aktuellen Target aktualisieren
     if (appState.activeTarget) {
-        updateModelVisibility(appState.activeTarget);
+        const structureType = appState.activeTarget;
+        const atomModel = document.getElementById(`${structureType}-atom`);
+        const schematicModel = document.getElementById(`${structureType}-schematic`);
 
-        // Wenn im Free Mode, reaktiviere Free Mode für das neue sichtbare Modell
-        if (appState.freeMode && appState.activeStructure) {
-            const structureType = appState.activeStructure;
-            const atomModel = document.getElementById(`${structureType}-atom`);
-            const schematicModel = document.getElementById(`${structureType}-schematic`);
-
-            // Deaktiviere Free Mode für beide
-            if (atomModel) atomModel.setAttribute('free-mode', { enabled: false });
-            if (schematicModel) schematicModel.setAttribute('free-mode', { enabled: false });
-
-            // Warte kurz, dann aktiviere Free Mode für das jetzt sichtbare Modell
-            setTimeout(() => {
-                const visibleModel = (newMode === 'atom') ? atomModel : schematicModel;
-                if (visibleModel) {
-                    visibleModel.setAttribute('free-mode', {
-                        enabled: true,
-                        structureType: structureType
-                    });
-                    console.log(`[WebAR] Free Mode reaktiviert für: ${visibleModel.id}`);
-                }
-            }, 100);
+        // Ändere NUR die Sichtbarkeit - NICHT Free Mode deaktivieren!
+        if (newMode === 'atom') {
+            // Zeige Atom, verstecke Schematisch
+            if (atomModel) {
+                atomModel.setAttribute('visible', 'true');
+                if (atomModel.object3D) atomModel.object3D.visible = true;
+            }
+            if (schematicModel) {
+                schematicModel.setAttribute('visible', 'false');
+                if (schematicModel.object3D) schematicModel.object3D.visible = false;
+            }
+        } else {
+            // Zeige Schematisch, verstecke Atom
+            if (schematicModel) {
+                schematicModel.setAttribute('visible', 'true');
+                if (schematicModel.object3D) schematicModel.object3D.visible = true;
+            }
+            if (atomModel) {
+                atomModel.setAttribute('visible', 'false');
+                if (atomModel.object3D) atomModel.object3D.visible = false;
+            }
         }
+
+        console.log(`[WebAR] Mode gewechselt zu: ${newMode}, Modelle aktualisiert`);
     }
 }
 
@@ -452,7 +456,7 @@ function startVisibilityWatcher(structureType) {
         clearInterval(visibilityWatcherInterval);
     }
 
-    // Starte neuen Watcher (SEHR AGGRESSIV - alle 50ms!)
+    // Starte neuen Watcher (alle 200ms)
     visibilityWatcherInterval = setInterval(() => {
         if (appState.freeMode && appState.activeStructure === structureType) {
             const atomModel = document.getElementById(`${structureType}-atom`);
@@ -481,7 +485,7 @@ function startVisibilityWatcher(structureType) {
                 }
             }
         }
-    }, 50); // Prüfe alle 50ms (sehr aggressiv!)
+    }, 200); // Prüfe alle 200ms
 }
 
 function stopVisibilityWatcher() {
