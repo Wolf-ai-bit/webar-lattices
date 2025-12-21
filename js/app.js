@@ -206,18 +206,21 @@ function setupTargetTracking(structureType, targetIndex) {
  * Wird aufgerufen, wenn ein Marker erkannt wird
  */
 function onTargetFound(structureType) {
-    // Wenn bereits eine Struktur im Free Mode ist, verstecke sie komplett
+    // FALL 1: Derselbe QR-Code wird nochmal gescannt → Nichts tun
+    if (appState.activeStructure === structureType) {
+        console.log(`[WebAR] ${structureType.toUpperCase()} Marker erneut erkannt - keine Änderung`);
+        updateStatus(`${structureInfo[structureType].name} erkannt`, true);
+        return; // Einfach weiterlaufen lassen
+    }
+
+    // FALL 2: Ein NEUER QR-Code wird gescannt → Wechsel
     if (appState.activeStructure && appState.activeStructure !== structureType) {
         console.log(`[WebAR] Wechsle von ${appState.activeStructure.toUpperCase()} zu ${structureType.toUpperCase()}`);
         exitFreeMode(appState.activeStructure);
         hideAllModels();
     }
 
-    // Verstecke vorheriges Modell falls ein anderer Marker aktiv war
-    if (appState.activeTarget && appState.activeTarget !== structureType) {
-        hideAllModels();
-    }
-
+    // FALL 3: Erster QR-Code Scan
     appState.activeTarget = structureType;
     appState.activeStructure = structureType;
     appState.trackingActive = true;
@@ -235,10 +238,12 @@ function onTargetFound(structureType) {
 
     // SOFORT in Camera-Relative Mode wechseln (keine Verzögerung!)
     enterFreeMode(structureType);
+
+    console.log(`[WebAR] ${structureType.toUpperCase()} erfolgreich geladen und in Free Mode`);
 }
 
 /**
- * Versteckt alle Modelle
+ * Versteckt alle Modelle (setzt BEIDE Properties: A-Frame + THREE.js)
  */
 function hideAllModels() {
     const allStructures = ['krz', 'kfz', 'hdp'];
@@ -247,38 +252,34 @@ function hideAllModels() {
         const atomModel = document.getElementById(`${structure}-atom`);
         const schematicModel = document.getElementById(`${structure}-schematic`);
 
-        if (atomModel) atomModel.setAttribute('visible', 'false');
-        if (schematicModel) schematicModel.setAttribute('visible', 'false');
+        if (atomModel) {
+            atomModel.setAttribute('visible', 'false');
+            if (atomModel.object3D) atomModel.object3D.visible = false;
+        }
+        if (schematicModel) {
+            schematicModel.setAttribute('visible', 'false');
+            if (schematicModel.object3D) schematicModel.object3D.visible = false;
+        }
     });
+
+    console.log('[WebAR] Alle Modelle versteckt');
 }
 
 /**
  * Wird aufgerufen, wenn ein Marker verloren geht
  * WICHTIG: Im Camera-Relative Mode bleibt das Modell sichtbar!
+ * Das Modell bleibt so lange sichtbar, bis ein NEUER QR-Code gescannt wird
  */
 function onTargetLost(structureType) {
     console.log(`[WebAR] ${structureType.toUpperCase()} Marker verloren`);
-    console.log(`[WebAR] Modell bleibt in Camera-Relative Position sichtbar`);
+    console.log(`[WebAR] Modell bleibt sichtbar bis neuer QR-Code gescannt wird`);
 
-    // Stelle sicher, dass das Modell sichtbar bleibt
-    if (appState.freeMode && appState.activeStructure === structureType) {
-        setTimeout(() => {
-            const atomModel = document.getElementById(`${structureType}-atom`);
-            const schematicModel = document.getElementById(`${structureType}-schematic`);
-
-            // Setze Sichtbarkeit basierend auf aktuellem Modus
-            if (appState.currentMode === 'atom' && atomModel) {
-                atomModel.setAttribute('visible', 'true');
-            } else if (appState.currentMode === 'schematic' && schematicModel) {
-                schematicModel.setAttribute('visible', 'true');
-            }
-
-            console.log(`[WebAR] Sichtbarkeit wiederhergestellt für: ${structureType}`);
-        }, 100);
-    }
+    // TUE NICHTS - Das Modell bleibt einfach sichtbar!
+    // Free Mode bleibt aktiv, Visibility Watcher läuft weiter
+    // Das Modell wird erst versteckt, wenn ein anderer QR-Code gescannt wird
 
     // Status aktualisieren
-    updateStatus(`${structureInfo[structureType].name} - Frei drehbar vor Kamera`, true);
+    updateStatus(`${structureInfo[structureType].name} - Frei drehbar (Marker nicht sichtbar)`, true);
 }
 
 // ============================================================================
