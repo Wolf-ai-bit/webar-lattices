@@ -276,26 +276,53 @@ function onTargetLost(structureType) {
 
     // WICHTIG: MindAR versucht die Modelle zu verstecken - wir forcieren Sichtbarkeit!
     if (appState.freeMode && appState.activeStructure === structureType) {
-        // Sofort Sichtbarkeit wiederherstellen
-        const atomModel = document.getElementById(`${structureType}-atom`);
-        const schematicModel = document.getElementById(`${structureType}-schematic`);
-
-        // Setze BEIDE Properties für das aktive Modell
-        if (appState.currentMode === 'atom' && atomModel) {
-            atomModel.setAttribute('visible', 'true');
-            if (atomModel.object3D) atomModel.object3D.visible = true;
-            console.log('[WebAR] Atom-Modell Sichtbarkeit erzwungen');
-        } else if (appState.currentMode === 'schematic' && schematicModel) {
-            schematicModel.setAttribute('visible', 'true');
-            if (schematicModel.object3D) schematicModel.object3D.visible = true;
-            console.log('[WebAR] Schematisch-Modell Sichtbarkeit erzwungen');
+        // SCHRITT 1: Setze Target-Entity selbst auf visible (MindAR versteckt diese!)
+        const target = document.getElementById(`${structureType}-target`);
+        if (target) {
+            target.setAttribute('visible', 'true');
+            if (target.object3D) {
+                target.object3D.visible = true;
+                // Setze ALLE Children rekursiv auf visible
+                target.object3D.traverse((child) => {
+                    child.visible = true;
+                });
+            }
         }
 
-        // Setze auch den Container explizit auf visible
+        // SCHRITT 2: Setze Container auf visible
         const container = document.getElementById(`${structureType}-models`);
         if (container) {
             container.setAttribute('visible', 'true');
-            if (container.object3D) container.object3D.visible = true;
+            if (container.object3D) {
+                container.object3D.visible = true;
+                container.object3D.traverse((child) => {
+                    child.visible = true;
+                });
+            }
+        }
+
+        // SCHRITT 3: Setze aktives Modell auf visible
+        const atomModel = document.getElementById(`${structureType}-atom`);
+        const schematicModel = document.getElementById(`${structureType}-schematic`);
+
+        if (appState.currentMode === 'atom' && atomModel) {
+            atomModel.setAttribute('visible', 'true');
+            if (atomModel.object3D) {
+                atomModel.object3D.visible = true;
+                atomModel.object3D.traverse((child) => {
+                    child.visible = true;
+                });
+            }
+            console.log('[WebAR] Atom-Modell Sichtbarkeit erzwungen');
+        } else if (appState.currentMode === 'schematic' && schematicModel) {
+            schematicModel.setAttribute('visible', 'true');
+            if (schematicModel.object3D) {
+                schematicModel.object3D.visible = true;
+                schematicModel.object3D.traverse((child) => {
+                    child.visible = true;
+                });
+            }
+            console.log('[WebAR] Schematisch-Modell Sichtbarkeit erzwungen');
         }
     }
 
@@ -478,9 +505,23 @@ function startVisibilityWatcher(structureType) {
         clearInterval(visibilityWatcherInterval);
     }
 
-    // Starte neuen Watcher (alle 200ms)
+    // Starte neuen Watcher (alle 100ms - aggressiver)
     visibilityWatcherInterval = setInterval(() => {
         if (appState.freeMode && appState.activeStructure === structureType) {
+            // Setze Target selbst auf visible
+            const target = document.getElementById(`${structureType}-target`);
+            if (target) {
+                target.setAttribute('visible', 'true');
+                if (target.object3D) target.object3D.visible = true;
+            }
+
+            // Setze Container auf visible
+            const container = document.getElementById(`${structureType}-models`);
+            if (container) {
+                container.setAttribute('visible', 'true');
+                if (container.object3D) container.object3D.visible = true;
+            }
+
             const atomModel = document.getElementById(`${structureType}-atom`);
             const schematicModel = document.getElementById(`${structureType}-schematic`);
 
@@ -488,26 +529,46 @@ function startVisibilityWatcher(structureType) {
             if (appState.currentMode === 'atom' && atomModel) {
                 // Setze BEIDE Attribute (A-Frame + THREE.js)
                 atomModel.setAttribute('visible', 'true');
-                if (atomModel.object3D) atomModel.object3D.visible = true;
+                if (atomModel.object3D) {
+                    atomModel.object3D.visible = true;
+                    atomModel.object3D.traverse((child) => {
+                        child.visible = true;
+                    });
+                }
 
                 // Verstecke schematic explizit
                 if (schematicModel) {
                     schematicModel.setAttribute('visible', 'false');
-                    if (schematicModel.object3D) schematicModel.object3D.visible = false;
+                    if (schematicModel.object3D) {
+                        schematicModel.object3D.visible = false;
+                        schematicModel.object3D.traverse((child) => {
+                            child.visible = false;
+                        });
+                    }
                 }
             } else if (appState.currentMode === 'schematic' && schematicModel) {
                 // Setze BEIDE Attribute (A-Frame + THREE.js)
                 schematicModel.setAttribute('visible', 'true');
-                if (schematicModel.object3D) schematicModel.object3D.visible = true;
+                if (schematicModel.object3D) {
+                    schematicModel.object3D.visible = true;
+                    schematicModel.object3D.traverse((child) => {
+                        child.visible = true;
+                    });
+                }
 
                 // Verstecke atom explizit
                 if (atomModel) {
                     atomModel.setAttribute('visible', 'false');
-                    if (atomModel.object3D) atomModel.object3D.visible = false;
+                    if (atomModel.object3D) {
+                        atomModel.object3D.visible = false;
+                        atomModel.object3D.traverse((child) => {
+                            child.visible = false;
+                        });
+                    }
                 }
             }
         }
-    }, 200); // Prüfe alle 200ms
+    }, 100); // Prüfe alle 100ms (aggressiver!)
 }
 
 function stopVisibilityWatcher() {

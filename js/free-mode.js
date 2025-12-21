@@ -153,34 +153,55 @@ AFRAME.registerComponent('free-mode', {
     /**
      * Startet Visibility-Enforcement Watcher
      * Kämpft gegen MindAR's Auto-Hide bei Target Lost
+     * ULTRA-AGGRESSIV: Läuft bei JEDEM FRAME (60x pro Sekunde!)
      */
     startVisibilityEnforcement: function () {
         // Stoppe vorherigen Watcher falls vorhanden
         this.stopVisibilityEnforcement();
 
-        // Starte neuen Watcher (alle 100ms - sehr aggressiv!)
-        this.visibilityEnforcementInterval = setInterval(() => {
+        // Verwende requestAnimationFrame für kontinuierliche Updates
+        const enforceVisibility = () => {
             if (this.isInFreeMode && this.movedContainer) {
-                // Setze Container-Sichtbarkeit
+                // SCHRITT 1: Setze Target-Entity auf visible (falls MindAR es versteckt)
+                if (this.originalParent) {
+                    this.originalParent.setAttribute('visible', 'true');
+                    if (this.originalParent.object3D) {
+                        this.originalParent.object3D.visible = true;
+                    }
+                }
+
+                // SCHRITT 2: Setze Container-Sichtbarkeit
                 this.movedContainer.setAttribute('visible', 'true');
                 if (this.movedContainer.object3D) {
                     this.movedContainer.object3D.visible = true;
                 }
 
-                // Finde alle Modelle und setze Sichtbarkeit
+                // SCHRITT 3: Finde alle Modelle und setze Sichtbarkeit
                 const allModels = this.movedContainer.querySelectorAll('a-gltf-model');
                 allModels.forEach(model => {
                     const visible = model.getAttribute('visible');
                     if (visible === 'true' || visible === true) {
-                        // Setze BEIDE Properties
+                        // Setze BEIDE Properties (A-Frame + THREE.js)
                         model.setAttribute('visible', 'true');
-                        if (model.object3D) model.object3D.visible = true;
+                        if (model.object3D) {
+                            model.object3D.visible = true;
+                            // Traversiere durch alle Children und setze visible
+                            model.object3D.traverse((child) => {
+                                child.visible = true;
+                            });
+                        }
                     }
                 });
-            }
-        }, 100); // Alle 100ms prüfen
 
-        console.log('[FreeMode] Visibility-Enforcement Watcher gestartet');
+                // SCHRITT 4: Nächsten Frame anfordern
+                this.visibilityEnforcementInterval = requestAnimationFrame(enforceVisibility);
+            }
+        };
+
+        // Starte den Loop
+        this.visibilityEnforcementInterval = requestAnimationFrame(enforceVisibility);
+
+        console.log('[FreeMode] ULTRA-AGGRESSIVE Visibility-Enforcement gestartet (60 FPS)');
     },
 
     /**
@@ -188,7 +209,7 @@ AFRAME.registerComponent('free-mode', {
      */
     stopVisibilityEnforcement: function () {
         if (this.visibilityEnforcementInterval) {
-            clearInterval(this.visibilityEnforcementInterval);
+            cancelAnimationFrame(this.visibilityEnforcementInterval);
             this.visibilityEnforcementInterval = null;
             console.log('[FreeMode] Visibility-Enforcement Watcher gestoppt');
         }
