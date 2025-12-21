@@ -1,12 +1,14 @@
 /**
  * Free Mode Component für WebAR Kristallstrukturen
  *
- * Ermöglicht persistente Modelle die nach Marker-Scan bleiben
- * und per Touch-Gesten rotiert werden können.
+ * CAMERA-RELATIVE TRACKING:
+ * - Beim Marker-Scan: Distanz zur Kamera wird gemessen
+ * - Bei Marker-Verlust: Modell bleibt in dieser Distanz vor der Kamera
+ * - Touch-Gesten: Drehen und Zoomen (Pinch)
  */
 
 // ============================================================================
-// FREE MODE A-FRAME COMPONENT
+// FREE MODE A-FRAME COMPONENT (Camera-Relative)
 // ============================================================================
 
 AFRAME.registerComponent('free-mode', {
@@ -17,19 +19,27 @@ AFRAME.registerComponent('free-mode', {
 
     init: function () {
         this.originalParent = null;
-        this.freeContainer = null;
+        this.originalPosition = { x: 0, y: 0, z: 0 };
         this.isInFreeMode = false;
+        this.savedDistance = 0.5; // Standard-Distanz: 50cm vor Kamera
 
         // Touch-Gesten Variablen
         this.touchStartX = 0;
         this.touchStartY = 0;
         this.currentRotationY = 0;
         this.currentRotationX = 0;
+        this.currentScale = 1.0;
+
+        // Pinch-Zoom Variablen
+        this.initialPinchDistance = null;
+        this.initialScale = 1.0;
 
         // Touch Event Listener
         this.onTouchStart = this.onTouchStart.bind(this);
         this.onTouchMove = this.onTouchMove.bind(this);
         this.onTouchEnd = this.onTouchEnd.bind(this);
+
+        console.log('[FreeMode] Component initialisiert für:', this.el.id);
     },
 
     update: function (oldData) {
@@ -41,49 +51,64 @@ AFRAME.registerComponent('free-mode', {
     },
 
     /**
-     * Aktiviert Free Mode - Modell wird vom Marker gelöst
+     * Aktiviert Camera-Relative Free Mode
+     * 1. Misst aktuelle Distanz zur Kamera
+     * 2. Bewegt Modell-Container zur Kamera (in gespeicherter Distanz)
      */
     enterFreeMode: function () {
         if (this.isInFreeMode) return;
 
-        console.log('[FreeMode] Aktiviere Free Mode für:', this.data.structureType);
+        console.log('[FreeMode] Aktiviere Camera-Relative Free Mode für:', this.data.structureType);
 
         // Finde den models-Container (Eltern-Element des Modells)
         let modelsContainer = this.el.parentElement;
 
-        // Gehe eine Ebene höher falls nötig (manchmal ist das Modell direkt im Target)
+        // Gehe eine Ebene höher falls nötig
         if (!modelsContainer.id.includes('models')) {
             modelsContainer = modelsContainer.parentElement;
         }
 
         console.log('[FreeMode] Models Container:', modelsContainer.id);
 
-        // Speichere aktuelle Welt-Position des Containers
-        const worldPosition = new THREE.Vector3();
-        modelsContainer.object3D.getWorldPosition(worldPosition);
+        // SCHRITT 1: Messe aktuelle Distanz zur Kamera
+        const camera = document.querySelector('[camera]');
+        if (!camera) {
+            console.error('[FreeMode] Kamera nicht gefunden!');
+            return;
+        }
 
-        const worldQuaternion = new THREE.Quaternion();
-        modelsContainer.object3D.getWorldQuaternion(worldQuaternion);
+        const cameraPos = new THREE.Vector3();
+        camera.object3D.getWorldPosition(cameraPos);
 
-        const worldScale = new THREE.Vector3();
-        modelsContainer.object3D.getWorldScale(worldScale);
+        const modelPos = new THREE.Vector3();
+        modelsContainer.object3D.getWorldPosition(modelPos);
 
-        // Erstelle Container für freies Modell (nicht an Marker gebunden)
-        this.freeContainer = document.createElement('a-entity');
-        this.freeContainer.setAttribute('id', `free-${this.data.structureType}-container`);
-        this.freeContainer.object3D.position.copy(worldPosition);
-        this.freeContainer.object3D.quaternion.copy(worldQuaternion);
-        this.freeContainer.object3D.scale.copy(worldScale);
+        // Berechne Distanz
+        this.savedDistance = cameraPos.distanceTo(modelPos);
+
+        // Begrenze Distanz (min 20cm, max 2m)
+        this.savedDistance = Math.max(0.2, Math.min(2.0, this.savedDistance));
+
+        console.log('[FreeMode] Gemessene Distanz zur Kamera:', this.savedDistance, 'm');
 
         // Speichere Original-Parent
         this.originalParent = modelsContainer.parentElement;
+        this.originalPosition = {
+            x: modelsContainer.getAttribute('position').x,
+            y: modelsContainer.getAttribute('position').y,
+            z: modelsContainer.getAttribute('position').z
+        };
 
-        // Bewege GESAMTEN models-Container in Free Container
-        this.freeContainer.appendChild(modelsContainer);
+        // SCHRITT 2: Bewege models-Container zur Kamera
+        // Position vor der Kamera (negative Z-Achse in A-Frame)
+        modelsContainer.setAttribute('position', {
+            x: 0,
+            y: 0,
+            z: -this.savedDistance
+        });
 
-        // Füge Free Container zur Scene hinzu (nicht zum Target!)
-        const scene = document.querySelector('a-scene');
-        scene.appendChild(this.freeContainer);
+        // Mache Container zu Child der Kamera
+        camera.appendChild(modelsContainer);
 
         this.isInFreeMode = true;
         this.movedContainer = modelsContainer;
@@ -91,8 +116,8 @@ AFRAME.registerComponent('free-mode', {
         // Aktiviere Touch-Gesten
         this.enableTouchGestures();
 
-        console.log('[FreeMode] Free Mode aktiviert, Position:', worldPosition);
-        console.log('[FreeMode] Moved Container:', this.movedContainer.id);
+        console.log('[FreeMode] Camera-Relative Mode aktiviert');
+        console.log('[FreeMode] Position vor Kamera:', `0, 0, -${this.savedDistance}`);
     },
 
     /**
@@ -108,27 +133,26 @@ AFRAME.registerComponent('free-mode', {
 
         // Bewege models-Container zurück zum Original-Parent (Target)
         if (this.originalParent && this.movedContainer) {
+            // Setze Original-Position zurück
+            this.movedContainer.setAttribute('position', this.originalPosition);
+
+            // Bewege zurück zu Original-Parent
             this.originalParent.appendChild(this.movedContainer);
         }
 
-        // Entferne Free Container
-        if (this.freeContainer && this.freeContainer.parentNode) {
-            this.freeContainer.parentNode.removeChild(this.freeContainer);
-        }
-
-        this.freeContainer = null;
         this.movedContainer = null;
         this.isInFreeMode = false;
 
         // Rotations-State zurücksetzen
         this.currentRotationX = 0;
         this.currentRotationY = 0;
+        this.currentScale = 1.0;
 
         console.log('[FreeMode] Free Mode deaktiviert');
     },
 
     /**
-     * Aktiviert Touch-Gesten für Rotation
+     * Aktiviert Touch-Gesten für Rotation und Zoom
      */
     enableTouchGestures: function () {
         const canvas = document.querySelector('a-scene').canvas;
@@ -136,7 +160,7 @@ AFRAME.registerComponent('free-mode', {
         canvas.addEventListener('touchmove', this.onTouchMove, { passive: false });
         canvas.addEventListener('touchend', this.onTouchEnd, { passive: false });
 
-        console.log('[FreeMode] Touch-Gesten aktiviert');
+        console.log('[FreeMode] Touch-Gesten aktiviert (Drehen + Pinch-Zoom)');
     },
 
     /**
@@ -156,45 +180,74 @@ AFRAME.registerComponent('free-mode', {
      */
     onTouchStart: function (event) {
         if (!this.isInFreeMode) return;
-        if (event.touches.length !== 1) return; // Nur Single-Touch
 
         event.preventDefault();
 
-        this.touchStartX = event.touches[0].clientX;
-        this.touchStartY = event.touches[0].clientY;
+        if (event.touches.length === 1) {
+            // Single Touch: Rotation
+            this.touchStartX = event.touches[0].clientX;
+            this.touchStartY = event.touches[0].clientY;
 
-        console.log('[FreeMode] Touch Start:', this.touchStartX, this.touchStartY);
+            console.log('[FreeMode] Single Touch Start (Rotation)');
+        } else if (event.touches.length === 2) {
+            // Zwei Finger: Pinch-Zoom
+            this.initialPinchDistance = this.getPinchDistance(event.touches);
+            this.initialScale = this.currentScale;
+
+            console.log('[FreeMode] Pinch Start (Zoom):', this.initialPinchDistance);
+        }
     },
 
     /**
-     * Touch Move Handler - Rotiert das Modell
+     * Touch Move Handler - Rotiert oder zoomt das Modell
      */
     onTouchMove: function (event) {
         if (!this.isInFreeMode) return;
-        if (event.touches.length !== 1) return;
 
         event.preventDefault();
 
-        const deltaX = event.touches[0].clientX - this.touchStartX;
-        const deltaY = event.touches[0].clientY - this.touchStartY;
+        if (event.touches.length === 1) {
+            // ROTATION (Single Touch)
+            const deltaX = event.touches[0].clientX - this.touchStartX;
+            const deltaY = event.touches[0].clientY - this.touchStartY;
 
-        // Rotation berechnen (Sensitivität: 0.5 Grad pro Pixel)
-        const rotationSensitivity = 0.5;
-        this.currentRotationY += deltaX * rotationSensitivity;
-        this.currentRotationX -= deltaY * rotationSensitivity;
+            // Rotation berechnen (Sensitivität: 0.5 Grad pro Pixel)
+            const rotationSensitivity = 0.5;
+            this.currentRotationY += deltaX * rotationSensitivity;
+            this.currentRotationX -= deltaY * rotationSensitivity;
 
-        // Rotation auf Container anwenden
-        if (this.freeContainer) {
-            this.freeContainer.object3D.rotation.set(
-                THREE.MathUtils.degToRad(this.currentRotationX),
-                THREE.MathUtils.degToRad(this.currentRotationY),
-                0
-            );
+            // Rotation auf Container anwenden
+            if (this.movedContainer) {
+                this.movedContainer.object3D.rotation.set(
+                    THREE.MathUtils.degToRad(this.currentRotationX),
+                    THREE.MathUtils.degToRad(this.currentRotationY),
+                    0
+                );
+            }
+
+            // Update Start-Position für nächsten Frame
+            this.touchStartX = event.touches[0].clientX;
+            this.touchStartY = event.touches[0].clientY;
+
+        } else if (event.touches.length === 2) {
+            // ZOOM (Pinch mit zwei Fingern)
+            const currentDistance = this.getPinchDistance(event.touches);
+            const scaleFactor = currentDistance / this.initialPinchDistance;
+
+            this.currentScale = this.initialScale * scaleFactor;
+
+            // Begrenze Zoom (0.5x bis 3x)
+            this.currentScale = Math.max(0.5, Math.min(3.0, this.currentScale));
+
+            // Scale auf Container anwenden
+            if (this.movedContainer) {
+                this.movedContainer.object3D.scale.set(
+                    this.currentScale,
+                    this.currentScale,
+                    this.currentScale
+                );
+            }
         }
-
-        // Update Start-Position für nächsten Frame
-        this.touchStartX = event.touches[0].clientX;
-        this.touchStartY = event.touches[0].clientY;
     },
 
     /**
@@ -203,8 +256,25 @@ AFRAME.registerComponent('free-mode', {
     onTouchEnd: function (event) {
         if (!this.isInFreeMode) return;
 
-        console.log('[FreeMode] Touch End, finale Rotation:',
-            this.currentRotationX, this.currentRotationY);
+        if (event.touches.length === 0) {
+            console.log('[FreeMode] Touch End');
+            console.log('[FreeMode] Finale Rotation:', this.currentRotationX, this.currentRotationY);
+            console.log('[FreeMode] Finaler Zoom:', this.currentScale);
+        }
+
+        // Reset Pinch-State wenn weniger als 2 Finger
+        if (event.touches.length < 2) {
+            this.initialPinchDistance = null;
+        }
+    },
+
+    /**
+     * Berechnet Distanz zwischen zwei Touch-Punkten (Pinch)
+     */
+    getPinchDistance: function (touches) {
+        const dx = touches[0].clientX - touches[1].clientX;
+        const dy = touches[0].clientY - touches[1].clientY;
+        return Math.sqrt(dx * dx + dy * dy);
     },
 
     /**
@@ -213,10 +283,11 @@ AFRAME.registerComponent('free-mode', {
     remove: function () {
         this.disableTouchGestures();
 
-        if (this.freeContainer && this.freeContainer.parentNode) {
-            this.freeContainer.parentNode.removeChild(this.freeContainer);
+        // Stelle sicher, dass Container zurück zum Original ist
+        if (this.isInFreeMode) {
+            this.exitFreeMode();
         }
     }
 });
 
-console.log('[FreeMode] Free Mode Component registriert');
+console.log('[FreeMode] Camera-Relative Free Mode Component registriert');

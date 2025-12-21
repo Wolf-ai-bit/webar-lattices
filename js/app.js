@@ -1,7 +1,7 @@
 /**
  * WebAR Kristallstrukturen - Main Application
  *
- * Verwaltet AR-Tracking, Mode-Switching und UI-Updates
+ * Verwaltet AR-Tracking, Camera-Relative Mode und UI-Updates
  */
 
 // ============================================================================
@@ -14,7 +14,7 @@ const appState = {
     activeStructure: null,          // null, 'krz', 'kfz', 'hdp' (für Free Mode)
     arReady: false,
     trackingActive: false,
-    freeMode: false                 // Free Mode aktiviert
+    freeMode: false                 // Camera-Relative Mode aktiviert
 };
 
 // Struktur-Informationen
@@ -67,6 +67,7 @@ const elements = {
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('[WebAR] Initialisiere Anwendung...');
+    console.log('[WebAR] Camera-Relative Tracking aktiviert');
 
     // Event Listeners registrieren
     registerEventListeners();
@@ -205,7 +206,7 @@ function setupTargetTracking(structureType, targetIndex) {
  * Wird aufgerufen, wenn ein Marker erkannt wird
  */
 function onTargetFound(structureType) {
-    // WICHTIG: Wenn bereits eine Struktur im Free Mode ist, verstecke sie komplett
+    // Wenn bereits eine Struktur im Free Mode ist, verstecke sie komplett
     if (appState.activeStructure && appState.activeStructure !== structureType) {
         console.log(`[WebAR] Wechsle von ${appState.activeStructure.toUpperCase()} zu ${structureType.toUpperCase()}`);
         exitFreeMode(appState.activeStructure);
@@ -232,7 +233,7 @@ function onTargetFound(structureType) {
     // Zeige aktuelles Modell basierend auf Modus
     updateModelVisibility(structureType);
 
-    // Nach kurzer Verzögerung in Free Mode wechseln (1 Sekunde)
+    // Nach kurzer Verzögerung in Camera-Relative Mode wechseln (1 Sekunde)
     setTimeout(() => {
         if (appState.activeTarget === structureType) {
             enterFreeMode(structureType);
@@ -257,16 +258,14 @@ function hideAllModels() {
 
 /**
  * Wird aufgerufen, wenn ein Marker verloren geht
+ * WICHTIG: Im Camera-Relative Mode bleibt das Modell sichtbar!
  */
 function onTargetLost(structureType) {
-    // NICHT das Modell verstecken - es bleibt sichtbar!
-    // Nur wenn ein anderer Marker erkannt wird, wird gewechselt
-    console.log(`[WebAR] ${structureType.toUpperCase()} Marker verloren (Modell bleibt sichtbar)`);
+    console.log(`[WebAR] ${structureType.toUpperCase()} Marker verloren`);
+    console.log(`[WebAR] Modell bleibt in Camera-Relative Position sichtbar`);
 
-    // WICHTIG: Stelle sicher, dass das Modell sichtbar bleibt, auch wenn MindAR das Target versteckt
-    // Dies ist notwendig, weil MindAR automatisch die Sichtbarkeit des Targets auf false setzt
+    // Stelle sicher, dass das Modell sichtbar bleibt
     if (appState.freeMode && appState.activeStructure === structureType) {
-        // Warte kurz, dann stelle sicher dass die Modelle sichtbar bleiben
         setTimeout(() => {
             const atomModel = document.getElementById(`${structureType}-atom`);
             const schematicModel = document.getElementById(`${structureType}-schematic`);
@@ -278,12 +277,12 @@ function onTargetLost(structureType) {
                 schematicModel.setAttribute('visible', 'true');
             }
 
-            console.log(`[WebAR] Modell-Sichtbarkeit wiederhergestellt für: ${structureType}`);
+            console.log(`[WebAR] Sichtbarkeit wiederhergestellt für: ${structureType}`);
         }, 100);
     }
 
-    // Status aktualisieren (aber UI bleibt sichtbar)
-    updateStatus(`${structureInfo[structureType].name} - Marker nicht mehr sichtbar`, true);
+    // Status aktualisieren
+    updateStatus(`${structureInfo[structureType].name} - Frei drehbar vor Kamera`, true);
 }
 
 // ============================================================================
@@ -310,7 +309,6 @@ function toggleMode() {
 
         // Wenn im Free Mode, reaktiviere Free Mode für das neue sichtbare Modell
         if (appState.freeMode && appState.activeStructure) {
-            // Deaktiviere Free Mode für alte Modelle
             const structureType = appState.activeStructure;
             const atomModel = document.getElementById(`${structureType}-atom`);
             const schematicModel = document.getElementById(`${structureType}-schematic`);
@@ -408,53 +406,15 @@ function updateStatus(message, active) {
 }
 
 // ============================================================================
-// DEBUGGING & DIAGNOSTICS
+// CAMERA-RELATIVE FREE MODE FUNKTIONEN
 // ============================================================================
 
 /**
- * Debugging-Funktion (nur für Entwicklung)
- */
-function logAppState() {
-    console.log('[WebAR] App State:', {
-        currentMode: appState.currentMode,
-        activeTarget: appState.activeTarget,
-        arReady: appState.arReady,
-        trackingActive: appState.trackingActive
-    });
-}
-
-// Globale Debugging-Funktion
-window.debugWebAR = () => {
-    logAppState();
-
-    console.log('[WebAR] Verfügbare Targets:', {
-        krz: document.getElementById('krz-target'),
-        kfz: document.getElementById('kfz-target'),
-        hdp: document.getElementById('hdp-target')
-    });
-
-    console.log('[WebAR] Verfügbare Modelle:', {
-        krz_atom: document.getElementById('krz-atom'),
-        krz_schematic: document.getElementById('krz-schematic'),
-        kfz_atom: document.getElementById('kfz-atom'),
-        kfz_schematic: document.getElementById('kfz-schematic'),
-        hdp_atom: document.getElementById('hdp-atom'),
-        hdp_schematic: document.getElementById('hdp-schematic')
-    });
-};
-
-// Console-Hinweis für Entwickler
-console.log('[WebAR] Debugging verfügbar: window.debugWebAR()');
-
-// ============================================================================
-// FREE MODE FUNKTIONEN
-// ============================================================================
-
-/**
- * Aktiviert Free Mode für eine Struktur
+ * Aktiviert Camera-Relative Free Mode für eine Struktur
+ * Das Modell wird in gespeicherter Distanz vor die Kamera gesetzt
  */
 function enterFreeMode(structureType) {
-    console.log(`[WebAR] Aktiviere Free Mode für: ${structureType}`);
+    console.log(`[WebAR] Aktiviere Camera-Relative Free Mode für: ${structureType}`);
 
     appState.freeMode = true;
 
@@ -463,7 +423,6 @@ function enterFreeMode(structureType) {
     const schematicModel = document.getElementById(`${structureType}-schematic`);
 
     // Aktiviere free-mode Component nur für das SICHTBARE Modell
-    // Dies verhindert doppeltes Bewegen des Containers
     let visibleModel = null;
 
     if (atomModel && atomModel.getAttribute('visible') === 'true') {
@@ -477,17 +436,17 @@ function enterFreeMode(structureType) {
             enabled: true,
             structureType: structureType
         });
-        console.log(`[WebAR] Free Mode aktiviert für Modell: ${visibleModel.id}`);
+        console.log(`[WebAR] Camera-Relative Mode aktiviert für: ${visibleModel.id}`);
 
-        // Starte Sichtbarkeits-Watcher der sicherstellt, dass das Modell sichtbar bleibt
+        // Starte Sichtbarkeits-Watcher
         startVisibilityWatcher(structureType);
     }
 
-    updateStatus(`${structureInfo[structureType].name} - Frei drehbar`, true);
+    updateStatus(`${structureInfo[structureType].name} - Frei drehbar & zoombar`, true);
 }
 
 /**
- * Überwacht die Sichtbarkeit eines Modells und stellt sicher, dass es sichtbar bleibt
+ * Überwacht die Sichtbarkeit und stellt sicher, dass das Modell sichtbar bleibt
  */
 let visibilityWatcherInterval = null;
 
@@ -527,7 +486,7 @@ function stopVisibilityWatcher() {
 }
 
 /**
- * Deaktiviert Free Mode für eine Struktur
+ * Deaktiviert Camera-Relative Free Mode für eine Struktur
  */
 function exitFreeMode(structureType) {
     console.log(`[WebAR] Deaktiviere Free Mode für: ${structureType}`);
@@ -541,7 +500,6 @@ function exitFreeMode(structureType) {
     const schematicModel = document.getElementById(`${structureType}-schematic`);
 
     // Deaktiviere free-mode Component für beide Modelle
-    // Aber nur eines davon hatte es wirklich aktiviert (das sichtbare)
     if (atomModel) {
         atomModel.setAttribute('free-mode', { enabled: false });
     }
@@ -563,6 +521,48 @@ function hideStructure(structureType) {
     if (atomModel) atomModel.setAttribute('visible', 'false');
     if (schematicModel) schematicModel.setAttribute('visible', 'false');
 }
+
+// ============================================================================
+// DEBUGGING & DIAGNOSTICS
+// ============================================================================
+
+/**
+ * Debugging-Funktion (nur für Entwicklung)
+ */
+function logAppState() {
+    console.log('[WebAR] App State:', {
+        currentMode: appState.currentMode,
+        activeTarget: appState.activeTarget,
+        activeStructure: appState.activeStructure,
+        arReady: appState.arReady,
+        trackingActive: appState.trackingActive,
+        freeMode: appState.freeMode
+    });
+}
+
+// Globale Debugging-Funktion
+window.debugWebAR = () => {
+    logAppState();
+
+    console.log('[WebAR] Verfügbare Targets:', {
+        krz: document.getElementById('krz-target'),
+        kfz: document.getElementById('kfz-target'),
+        hdp: document.getElementById('hdp-target')
+    });
+
+    console.log('[WebAR] Verfügbare Modelle:', {
+        krz_atom: document.getElementById('krz-atom'),
+        krz_schematic: document.getElementById('krz-schematic'),
+        kfz_atom: document.getElementById('kfz-atom'),
+        kfz_schematic: document.getElementById('kfz-schematic'),
+        hdp_atom: document.getElementById('hdp-atom'),
+        hdp_schematic: document.getElementById('hdp-schematic')
+    });
+};
+
+// Console-Hinweis für Entwickler
+console.log('[WebAR] Debugging verfügbar: window.debugWebAR()');
+console.log('[WebAR] Camera-Relative Tracking: Modelle bleiben in fester Distanz vor Kamera');
 
 // ============================================================================
 // FEHLERBEHANDLUNG
