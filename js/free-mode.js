@@ -34,6 +34,9 @@ AFRAME.registerComponent('free-mode', {
         this.initialPinchDistance = null;
         this.initialScale = 1.0;
 
+        // Visibility-Enforcement Watcher
+        this.visibilityEnforcementInterval = null;
+
         // Touch Event Listener
         this.onTouchStart = this.onTouchStart.bind(this);
         this.onTouchMove = this.onTouchMove.bind(this);
@@ -116,6 +119,9 @@ AFRAME.registerComponent('free-mode', {
         // WICHTIG: Stelle SOFORT sicher, dass Modelle sichtbar sind
         this.forceVisibility();
 
+        // Starte Visibility-Enforcement Watcher (kämpft gegen MindAR's Auto-Hide)
+        this.startVisibilityEnforcement();
+
         // Aktiviere Touch-Gesten
         this.enableTouchGestures();
 
@@ -145,12 +151,59 @@ AFRAME.registerComponent('free-mode', {
     },
 
     /**
+     * Startet Visibility-Enforcement Watcher
+     * Kämpft gegen MindAR's Auto-Hide bei Target Lost
+     */
+    startVisibilityEnforcement: function () {
+        // Stoppe vorherigen Watcher falls vorhanden
+        this.stopVisibilityEnforcement();
+
+        // Starte neuen Watcher (alle 100ms - sehr aggressiv!)
+        this.visibilityEnforcementInterval = setInterval(() => {
+            if (this.isInFreeMode && this.movedContainer) {
+                // Setze Container-Sichtbarkeit
+                this.movedContainer.setAttribute('visible', 'true');
+                if (this.movedContainer.object3D) {
+                    this.movedContainer.object3D.visible = true;
+                }
+
+                // Finde alle Modelle und setze Sichtbarkeit
+                const allModels = this.movedContainer.querySelectorAll('a-gltf-model');
+                allModels.forEach(model => {
+                    const visible = model.getAttribute('visible');
+                    if (visible === 'true' || visible === true) {
+                        // Setze BEIDE Properties
+                        model.setAttribute('visible', 'true');
+                        if (model.object3D) model.object3D.visible = true;
+                    }
+                });
+            }
+        }, 100); // Alle 100ms prüfen
+
+        console.log('[FreeMode] Visibility-Enforcement Watcher gestartet');
+    },
+
+    /**
+     * Stoppt Visibility-Enforcement Watcher
+     */
+    stopVisibilityEnforcement: function () {
+        if (this.visibilityEnforcementInterval) {
+            clearInterval(this.visibilityEnforcementInterval);
+            this.visibilityEnforcementInterval = null;
+            console.log('[FreeMode] Visibility-Enforcement Watcher gestoppt');
+        }
+    },
+
+    /**
      * Deaktiviert Free Mode - Modell wird zurück zum Marker bewegt
      */
     exitFreeMode: function () {
         if (!this.isInFreeMode) return;
 
         console.log('[FreeMode] Deaktiviere Free Mode für:', this.data.structureType);
+
+        // Stoppe Visibility-Enforcement
+        this.stopVisibilityEnforcement();
 
         // Deaktiviere Touch-Gesten
         this.disableTouchGestures();
@@ -305,6 +358,10 @@ AFRAME.registerComponent('free-mode', {
      * Component Remove - Cleanup
      */
     remove: function () {
+        // Stoppe Visibility-Enforcement
+        this.stopVisibilityEnforcement();
+
+        // Deaktiviere Touch-Gesten
         this.disableTouchGestures();
 
         // Stelle sicher, dass Container zurück zum Original ist

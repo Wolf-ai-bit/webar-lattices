@@ -274,9 +274,30 @@ function onTargetLost(structureType) {
     console.log(`[WebAR] ${structureType.toUpperCase()} Marker verloren`);
     console.log(`[WebAR] Modell bleibt sichtbar bis neuer QR-Code gescannt wird`);
 
-    // TUE NICHTS - Das Modell bleibt einfach sichtbar!
-    // Free Mode bleibt aktiv, Visibility Watcher läuft weiter
-    // Das Modell wird erst versteckt, wenn ein anderer QR-Code gescannt wird
+    // WICHTIG: MindAR versucht die Modelle zu verstecken - wir forcieren Sichtbarkeit!
+    if (appState.freeMode && appState.activeStructure === structureType) {
+        // Sofort Sichtbarkeit wiederherstellen
+        const atomModel = document.getElementById(`${structureType}-atom`);
+        const schematicModel = document.getElementById(`${structureType}-schematic`);
+
+        // Setze BEIDE Properties für das aktive Modell
+        if (appState.currentMode === 'atom' && atomModel) {
+            atomModel.setAttribute('visible', 'true');
+            if (atomModel.object3D) atomModel.object3D.visible = true;
+            console.log('[WebAR] Atom-Modell Sichtbarkeit erzwungen');
+        } else if (appState.currentMode === 'schematic' && schematicModel) {
+            schematicModel.setAttribute('visible', 'true');
+            if (schematicModel.object3D) schematicModel.object3D.visible = true;
+            console.log('[WebAR] Schematisch-Modell Sichtbarkeit erzwungen');
+        }
+
+        // Setze auch den Container explizit auf visible
+        const container = document.getElementById(`${structureType}-models`);
+        if (container) {
+            container.setAttribute('visible', 'true');
+            if (container.object3D) container.object3D.visible = true;
+        }
+    }
 
     // Status aktualisieren
     updateStatus(`${structureInfo[structureType].name} - Frei drehbar (Marker nicht sichtbar)`, true);
