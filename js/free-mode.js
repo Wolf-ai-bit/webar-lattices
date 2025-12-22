@@ -99,14 +99,12 @@ AFRAME.registerComponent('free-mode', {
         const models = this.movedContainer.querySelectorAll('a-gltf-model');
         models.forEach(model => {
             if (model.getAttribute('visible') === 'true') {
-                model.object3D.visible = true;
+                model.setAttribute('visible', 'true');
+                if (model.object3D) model.object3D.visible = true;
             }
         });
     },
 
-    /**
-     * Hält das Modell sichtbar und an der Kamera
-     */
     startVisibilityEnforcement: function () {
         this.stopVisibilityEnforcement();
 
@@ -132,7 +130,8 @@ AFRAME.registerComponent('free-mode', {
             const models = this.movedContainer.querySelectorAll('a-gltf-model');
             models.forEach(model => {
                 if (model.getAttribute('visible') === 'true') {
-                    model.object3D.visible = true;
+                    model.setAttribute('visible', 'true');
+                    if (model.object3D) model.object3D.visible = true;
                 }
             });
 

@@ -231,8 +231,14 @@ function hideAllModels() {
         const atom = document.getElementById(`${structure}-atom`);
         const schematic = document.getElementById(`${structure}-schematic`);
 
-        if (atom && atom.object3D) atom.object3D.visible = false;
-        if (schematic && schematic.object3D) schematic.object3D.visible = false;
+        if (atom) {
+            atom.setAttribute('visible', 'false');
+            if (atom.object3D) atom.object3D.visible = false;
+        }
+        if (schematic) {
+            schematic.setAttribute('visible', 'false');
+            if (schematic.object3D) schematic.object3D.visible = false;
+        }
     });
 }
 
@@ -257,11 +263,23 @@ function toggleMode() {
         const schematic = document.getElementById(`${appState.activeTarget}-schematic`);
 
         if (newMode === 'atom') {
-            if (atom) atom.setAttribute('visible', 'true');
-            if (schematic) schematic.setAttribute('visible', 'false');
+            if (atom) {
+                atom.setAttribute('visible', 'true');
+                if (atom.object3D) atom.object3D.visible = true;
+            }
+            if (schematic) {
+                schematic.setAttribute('visible', 'false');
+                if (schematic.object3D) schematic.object3D.visible = false;
+            }
         } else {
-            if (schematic) schematic.setAttribute('visible', 'true');
-            if (atom) atom.setAttribute('visible', 'false');
+            if (schematic) {
+                schematic.setAttribute('visible', 'true');
+                if (schematic.object3D) schematic.object3D.visible = true;
+            }
+            if (atom) {
+                atom.setAttribute('visible', 'false');
+                if (atom.object3D) atom.object3D.visible = false;
+            }
         }
     }
 }
@@ -278,28 +296,23 @@ function updateModeUI() {
     elements.modeText.textContent = `Zu ${nextModeName} wechseln`;
 }
 
-/**
- * Aktualisiert Modell-Sichtbarkeit basierend auf Modus
- */
 function updateModelVisibility(structureType) {
-    const atomModel = document.getElementById(`${structureType}-atom`);
-    const schematicModel = document.getElementById(`${structureType}-schematic`);
+    const atom = document.getElementById(`${structureType}-atom`);
+    const schematic = document.getElementById(`${structureType}-schematic`);
 
-    if (!atomModel || !schematicModel) {
-        console.error(`[WebAR] Modelle nicht gefunden für: ${structureType}`);
-        return;
-    }
+    if (!atom || !schematic) return;
 
-    // Zeige/Verstecke Modelle mit sanftem Übergang
     if (appState.currentMode === 'atom') {
-        atomModel.setAttribute('visible', 'true');
-        schematicModel.setAttribute('visible', 'false');
+        atom.setAttribute('visible', 'true');
+        schematic.setAttribute('visible', 'false');
+        if (atom.object3D) atom.object3D.visible = true;
+        if (schematic.object3D) schematic.object3D.visible = false;
     } else {
-        atomModel.setAttribute('visible', 'false');
-        schematicModel.setAttribute('visible', 'true');
+        atom.setAttribute('visible', 'false');
+        schematic.setAttribute('visible', 'true');
+        if (atom.object3D) atom.object3D.visible = false;
+        if (schematic.object3D) schematic.object3D.visible = true;
     }
-
-    console.log(`[WebAR] Modell-Sichtbarkeit aktualisiert: ${structureType} → ${appState.currentMode}`);
 }
 
 // ============================================================================
