@@ -53,48 +53,27 @@ AFRAME.registerComponent('free-mode', {
         }
     },
 
-    /**
-     * Aktiviert Camera-Relative Free Mode
-     * 1. Misst aktuelle Distanz zur Kamera
-     * 2. Bewegt Modell-Container zur Kamera (in gespeicherter Distanz)
-     */
     enterFreeMode: function () {
         if (this.isInFreeMode) return;
 
-        console.log('[FreeMode] Aktiviere Camera-Relative Free Mode für:', this.data.structureType);
-
-        // Finde den models-Container (Eltern-Element des Modells)
         let modelsContainer = this.el.parentElement;
-
-        // Gehe eine Ebene höher falls nötig
         if (!modelsContainer.id.includes('models')) {
             modelsContainer = modelsContainer.parentElement;
         }
 
-        console.log('[FreeMode] Models Container:', modelsContainer.id);
-
-        // SCHRITT 1: Messe aktuelle Distanz zur Kamera
         const camera = document.querySelector('[camera]');
-        if (!camera) {
-            console.error('[FreeMode] Kamera nicht gefunden!');
-            return;
-        }
+        if (!camera) return;
 
+        // Distanz zur Kamera messen
         const cameraPos = new THREE.Vector3();
         camera.object3D.getWorldPosition(cameraPos);
-
         const modelPos = new THREE.Vector3();
         modelsContainer.object3D.getWorldPosition(modelPos);
 
-        // Berechne Distanz
         this.savedDistance = cameraPos.distanceTo(modelPos);
-
-        // Begrenze Distanz (min 20cm, max 2m)
         this.savedDistance = Math.max(0.2, Math.min(2.0, this.savedDistance));
 
-        console.log('[FreeMode] Gemessene Distanz zur Kamera:', this.savedDistance, 'm');
-
-        // Speichere Original-Parent
+        // Original-Zustand speichern
         this.originalParent = modelsContainer.parentElement;
         this.originalPosition = {
             x: modelsContainer.getAttribute('position').x,
@@ -102,199 +81,104 @@ AFRAME.registerComponent('free-mode', {
             z: modelsContainer.getAttribute('position').z
         };
 
-        // SCHRITT 2: Bewege models-Container zur Kamera
-        // Position vor der Kamera (negative Z-Achse in A-Frame)
-        modelsContainer.setAttribute('position', {
-            x: 0,
-            y: 0,
-            z: -this.savedDistance
-        });
-
-        // Mache Container zu Child der Kamera
+        // Container zur Kamera bewegen
+        modelsContainer.object3D.position.set(0, 0, -this.savedDistance);
         camera.appendChild(modelsContainer);
-
-        // WICHTIG: Deaktiviere Matrix-Auto-Update für mehr Kontrolle
-        // Dann wird A-Frame's Positions-System die Matrix nicht überschreiben
-        if (modelsContainer.object3D) {
-            modelsContainer.object3D.matrixAutoUpdate = true; // Lasse es an für simplere Logik
-        }
 
         this.isInFreeMode = true;
         this.movedContainer = modelsContainer;
-        this.camera = camera;
 
-        // WICHTIG: Stelle SOFORT sicher, dass Modelle sichtbar sind
         this.forceVisibility();
-
-        // Starte Visibility-Enforcement Watcher (kämpft gegen MindAR's Auto-Hide)
         this.startVisibilityEnforcement();
-
-        // Aktiviere Touch-Gesten
         this.enableTouchGestures();
-
-        console.log('[FreeMode] Camera-Relative Mode aktiviert');
-        console.log('[FreeMode] Position vor Kamera:', `0, 0, -${this.savedDistance}`);
     },
 
-    /**
-     * Erzwingt Sichtbarkeit der Modelle SOFORT
-     */
     forceVisibility: function () {
         if (!this.movedContainer) return;
 
-        // Finde alle Modelle im Container
-        const allModels = this.movedContainer.querySelectorAll('a-gltf-model');
-
-        allModels.forEach(model => {
-            const visible = model.getAttribute('visible');
-            if (visible === 'true' || visible === true) {
-                // Setze explizit auf sichtbar
-                model.setAttribute('visible', 'true');
+        const models = this.movedContainer.querySelectorAll('a-gltf-model');
+        models.forEach(model => {
+            if (model.getAttribute('visible') === 'true') {
                 model.object3D.visible = true;
-
-                console.log('[FreeMode] Force Visibility für:', model.id, '✓');
             }
         });
     },
 
     /**
-     * Startet Visibility-Enforcement Watcher
-     * Kämpft gegen MindAR's Auto-Hide bei Target Lost
-     * ULTRA-AGGRESSIV: Läuft bei JEDEM FRAME (60x pro Sekunde!)
+     * Hält das Modell sichtbar und an der Kamera
      */
     startVisibilityEnforcement: function () {
-        // Stoppe vorherigen Watcher falls vorhanden
         this.stopVisibilityEnforcement();
 
-        // Verwende requestAnimationFrame für kontinuierliche Updates
-        const enforceVisibility = () => {
-            if (this.isInFreeMode && this.movedContainer) {
-                const camera = document.querySelector('[camera]');
+        const update = () => {
+            if (!this.isInFreeMode || !this.movedContainer) return;
 
-                if (camera) {
-                    // ULTRA-KRITISCH 1: Stelle sicher, dass Kamera selbst visible ist!
-                    camera.setAttribute('visible', 'true');
-                    if (camera.object3D) {
-                        camera.object3D.visible = true;
-                    }
+            const camera = document.querySelector('[camera]');
+            if (!camera) return;
 
-                    // ULTRA-KRITISCH 2: ERZWINGE bei JEDEM Frame, dass Container bei Kamera ist!
-                    // appendChild ist idempotent - wenn bereits Child, tut es nichts Schädliches
-                    const currentParent = this.movedContainer.parentElement;
-                    if (currentParent !== camera) {
-                        console.warn('[FreeMode] ⚠️ Container wurde zurückgeholt! Parent war:', currentParent?.id || 'null');
-                        camera.appendChild(this.movedContainer);
-                    }
-
-                    // ULTRA-KRITISCH 3: ERZWINGE Position bei JEDEM Frame!
-                    // Setze IMMER, nicht nur wenn geändert - ist schnell genug
-                    this.movedContainer.object3D.position.set(0, 0, -this.savedDistance);
-
-                    // Stelle sicher, dass die Matrix aktualisiert wird
-                    this.movedContainer.object3D.updateMatrix();
-                }
-
-                // SCHRITT 1: Setze Container-Sichtbarkeit (IMMER)
-                this.movedContainer.setAttribute('visible', 'true');
-                if (this.movedContainer.object3D) {
-                    this.movedContainer.object3D.visible = true;
-                }
-
-                // SCHRITT 2: Finde alle Modelle und setze Sichtbarkeit
-                const allModels = this.movedContainer.querySelectorAll('a-gltf-model');
-                allModels.forEach(model => {
-                    const visible = model.getAttribute('visible');
-                    if (visible === 'true' || visible === true) {
-                        // Setze BEIDE Properties (A-Frame + THREE.js)
-                        model.setAttribute('visible', 'true');
-                        if (model.object3D) {
-                            model.object3D.visible = true;
-                            // Traversiere durch alle Children und setze visible
-                            model.object3D.traverse((child) => {
-                                child.visible = true;
-                            });
-                        }
-                    }
-                });
-
-                // SCHRITT 3: Nächsten Frame anfordern
-                this.visibilityEnforcementInterval = requestAnimationFrame(enforceVisibility);
+            // Container muss bei der Kamera bleiben
+            if (this.movedContainer.parentElement !== camera) {
+                camera.appendChild(this.movedContainer);
             }
+
+            // Position vor der Kamera halten
+            this.movedContainer.object3D.position.set(0, 0, -this.savedDistance);
+            this.movedContainer.object3D.updateMatrix();
+
+            // Container sichtbar machen
+            this.movedContainer.object3D.visible = true;
+
+            // Sichtbare Modelle finden und anzeigen
+            const models = this.movedContainer.querySelectorAll('a-gltf-model');
+            models.forEach(model => {
+                if (model.getAttribute('visible') === 'true') {
+                    model.object3D.visible = true;
+                }
+            });
+
+            this.visibilityEnforcementInterval = requestAnimationFrame(update);
         };
 
-        // Starte den Loop
-        this.visibilityEnforcementInterval = requestAnimationFrame(enforceVisibility);
-
-        console.log('[FreeMode] ULTRA-AGGRESSIVE Visibility-Enforcement gestartet (60 FPS)');
+        this.visibilityEnforcementInterval = requestAnimationFrame(update);
     },
 
-    /**
-     * Stoppt Visibility-Enforcement Watcher
-     */
     stopVisibilityEnforcement: function () {
         if (this.visibilityEnforcementInterval) {
             cancelAnimationFrame(this.visibilityEnforcementInterval);
             this.visibilityEnforcementInterval = null;
-            console.log('[FreeMode] Visibility-Enforcement Watcher gestoppt');
         }
     },
 
-    /**
-     * Deaktiviert Free Mode - Modell wird zurück zum Marker bewegt
-     */
     exitFreeMode: function () {
         if (!this.isInFreeMode) return;
 
-        console.log('[FreeMode] Deaktiviere Free Mode für:', this.data.structureType);
-
-        // Stoppe Visibility-Enforcement
         this.stopVisibilityEnforcement();
-
-        // Deaktiviere Touch-Gesten
         this.disableTouchGestures();
 
-        // Bewege models-Container zurück zum Original-Parent (Target)
         if (this.originalParent && this.movedContainer) {
-            // Setze Original-Position zurück
             this.movedContainer.setAttribute('position', this.originalPosition);
-
-            // Bewege zurück zu Original-Parent
             this.originalParent.appendChild(this.movedContainer);
         }
 
         this.movedContainer = null;
         this.isInFreeMode = false;
-
-        // Rotations-State zurücksetzen
         this.currentRotationX = 0;
         this.currentRotationY = 0;
         this.currentScale = 1.0;
-
-        console.log('[FreeMode] Free Mode deaktiviert');
     },
 
-    /**
-     * Aktiviert Touch-Gesten für Rotation und Zoom
-     */
     enableTouchGestures: function () {
         const canvas = document.querySelector('a-scene').canvas;
         canvas.addEventListener('touchstart', this.onTouchStart, { passive: false });
         canvas.addEventListener('touchmove', this.onTouchMove, { passive: false });
         canvas.addEventListener('touchend', this.onTouchEnd, { passive: false });
-
-        console.log('[FreeMode] Touch-Gesten aktiviert (Drehen + Pinch-Zoom)');
     },
 
-    /**
-     * Deaktiviert Touch-Gesten
-     */
     disableTouchGestures: function () {
         const canvas = document.querySelector('a-scene').canvas;
         canvas.removeEventListener('touchstart', this.onTouchStart);
         canvas.removeEventListener('touchmove', this.onTouchMove);
         canvas.removeEventListener('touchend', this.onTouchEnd);
-
-        console.log('[FreeMode] Touch-Gesten deaktiviert');
     },
 
     /**

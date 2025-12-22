@@ -202,139 +202,67 @@ function setupTargetTracking(structureType, targetIndex) {
     });
 }
 
-/**
- * Wird aufgerufen, wenn ein Marker erkannt wird
- */
 function onTargetFound(structureType) {
-    // FALL 1: Derselbe QR-Code wird nochmal gescannt → Nichts tun
+    // Wenn derselbe Marker nochmal erkannt wird, ignorieren
     if (appState.activeStructure === structureType) {
-        console.log(`[WebAR] ${structureType.toUpperCase()} Marker erneut erkannt - keine Änderung`);
-        updateStatus(`${structureInfo[structureType].name} erkannt`, true);
-        return; // Einfach weiterlaufen lassen
+        return;
     }
 
-    // FALL 2: Ein NEUER QR-Code wird gescannt → Wechsel
+    // Wenn ein anderer Marker aktiv ist, erst aufräumen
     if (appState.activeStructure && appState.activeStructure !== structureType) {
-        console.log(`[WebAR] Wechsle von ${appState.activeStructure.toUpperCase()} zu ${structureType.toUpperCase()}`);
         exitFreeMode(appState.activeStructure);
         hideAllModels();
     }
 
-    // FALL 3: Erster QR-Code Scan
     appState.activeTarget = structureType;
     appState.activeStructure = structureType;
     appState.trackingActive = true;
 
-    // UI aktualisieren
     showStructureInfo(structureType);
     elements.modeToggle.classList.remove('hidden');
+    updateStatus(`${structureInfo[structureType].name} erkannt`, true);
 
-    // Status aktualisieren
-    const info = structureInfo[structureType];
-    updateStatus(`${info.name} erkannt`, true);
-
-    // Zeige aktuelles Modell basierend auf Modus
     updateModelVisibility(structureType);
-
-    // SOFORT in Camera-Relative Mode wechseln (keine Verzögerung!)
     enterFreeMode(structureType);
-
-    console.log(`[WebAR] ${structureType.toUpperCase()} erfolgreich geladen und in Free Mode`);
 }
 
-/**
- * Versteckt alle Modelle (setzt BEIDE Properties: A-Frame + THREE.js)
- */
 function hideAllModels() {
-    const allStructures = ['krz', 'kfz', 'hdp'];
+    ['krz', 'kfz', 'hdp'].forEach(structure => {
+        const atom = document.getElementById(`${structure}-atom`);
+        const schematic = document.getElementById(`${structure}-schematic`);
 
-    allStructures.forEach(structure => {
-        const atomModel = document.getElementById(`${structure}-atom`);
-        const schematicModel = document.getElementById(`${structure}-schematic`);
-
-        if (atomModel) {
-            atomModel.setAttribute('visible', 'false');
-            if (atomModel.object3D) atomModel.object3D.visible = false;
-        }
-        if (schematicModel) {
-            schematicModel.setAttribute('visible', 'false');
-            if (schematicModel.object3D) schematicModel.object3D.visible = false;
-        }
+        if (atom && atom.object3D) atom.object3D.visible = false;
+        if (schematic && schematic.object3D) schematic.object3D.visible = false;
     });
-
-    console.log('[WebAR] Alle Modelle versteckt');
 }
 
-/**
- * Wird aufgerufen, wenn ein Marker verloren geht
- * WICHTIG: Im Camera-Relative Mode bleibt das Modell sichtbar!
- * Das Modell bleibt so lange sichtbar, bis ein NEUER QR-Code gescannt wird
- */
 function onTargetLost(structureType) {
-    console.log(`[WebAR] ${structureType.toUpperCase()} Marker verloren`);
-    console.log(`[WebAR] Modell bleibt sichtbar - Free Mode Enforcement übernimmt`);
-
-    // WICHTIG: TUE NICHTS mit dem Target!
-    // Das Target darf MindAR verstecken - der Container ist ja schon bei der Kamera!
-    // Der requestAnimationFrame Loop in free-mode.js kümmert sich um alles.
-
-    // Nur Status aktualisieren
     if (appState.freeMode && appState.activeStructure === structureType) {
-        console.log('[WebAR] Container ist bei Kamera - requestAnimationFrame Loop überwacht Sichtbarkeit');
+        updateStatus(`${structureInfo[structureType].name} - Frei drehbar`, true);
     }
-
-    // Status aktualisieren
-    updateStatus(`${structureInfo[structureType].name} - Frei drehbar (Marker nicht sichtbar)`, true);
 }
 
 // ============================================================================
 // MODE SWITCHING
 // ============================================================================
 
-/**
- * Wechselt zwischen Atom- und Schematisch-Modus
- */
 function toggleMode() {
-    const oldMode = appState.currentMode;
-    const newMode = (oldMode === 'atom') ? 'schematic' : 'atom';
-
-    console.log(`[WebAR] Wechsle Modus: ${oldMode} → ${newMode}`);
-
+    const newMode = (appState.currentMode === 'atom') ? 'schematic' : 'atom';
     appState.currentMode = newMode;
 
-    // UI aktualisieren
     updateModeUI();
 
-    // Modell-Sichtbarkeit für aktuellen Target aktualisieren
     if (appState.activeTarget) {
-        const structureType = appState.activeTarget;
-        const atomModel = document.getElementById(`${structureType}-atom`);
-        const schematicModel = document.getElementById(`${structureType}-schematic`);
+        const atom = document.getElementById(`${appState.activeTarget}-atom`);
+        const schematic = document.getElementById(`${appState.activeTarget}-schematic`);
 
-        // Ändere NUR die Sichtbarkeit - NICHT Free Mode deaktivieren!
         if (newMode === 'atom') {
-            // Zeige Atom, verstecke Schematisch
-            if (atomModel) {
-                atomModel.setAttribute('visible', 'true');
-                if (atomModel.object3D) atomModel.object3D.visible = true;
-            }
-            if (schematicModel) {
-                schematicModel.setAttribute('visible', 'false');
-                if (schematicModel.object3D) schematicModel.object3D.visible = false;
-            }
+            if (atom) atom.setAttribute('visible', 'true');
+            if (schematic) schematic.setAttribute('visible', 'false');
         } else {
-            // Zeige Schematisch, verstecke Atom
-            if (schematicModel) {
-                schematicModel.setAttribute('visible', 'true');
-                if (schematicModel.object3D) schematicModel.object3D.visible = true;
-            }
-            if (atomModel) {
-                atomModel.setAttribute('visible', 'false');
-                if (atomModel.object3D) atomModel.object3D.visible = false;
-            }
+            if (schematic) schematic.setAttribute('visible', 'true');
+            if (atom) atom.setAttribute('visible', 'false');
         }
-
-        console.log(`[WebAR] Mode gewechselt zu: ${newMode}, Modelle aktualisiert`);
     }
 }
 
@@ -442,96 +370,13 @@ function enterFreeMode(structureType) {
             enabled: true,
             structureType: structureType
         });
-        console.log(`[WebAR] Camera-Relative Mode aktiviert für: ${visibleModel.id}`);
-
-        // Starte Sichtbarkeits-Watcher
-        startVisibilityWatcher(structureType);
     }
 
-    updateStatus(`${structureInfo[structureType].name} - Frei drehbar & zoombar`, true);
+    updateStatus(`${structureInfo[structureType].name} - Frei drehbar`, true);
 }
 
-/**
- * Überwacht die Sichtbarkeit und stellt sicher, dass das Modell sichtbar bleibt
- */
-let visibilityWatcherInterval = null;
-
-function startVisibilityWatcher(structureType) {
-    // Stoppe vorherigen Watcher
-    if (visibilityWatcherInterval) {
-        clearInterval(visibilityWatcherInterval);
-    }
-
-    // Starte neuen Watcher (alle 200ms - Backup für requestAnimationFrame in free-mode.js)
-    // HAUPTSÄCHLICH für Mode-Toggle Sichtbarkeit
-    visibilityWatcherInterval = setInterval(() => {
-        if (appState.freeMode && appState.activeStructure === structureType) {
-            const atomModel = document.getElementById(`${structureType}-atom`);
-            const schematicModel = document.getElementById(`${structureType}-schematic`);
-
-            // Stelle sicher, dass das aktive Modell sichtbar ist
-            if (appState.currentMode === 'atom' && atomModel) {
-                // Setze BEIDE Attribute (A-Frame + THREE.js)
-                atomModel.setAttribute('visible', 'true');
-                if (atomModel.object3D) {
-                    atomModel.object3D.visible = true;
-                    atomModel.object3D.traverse((child) => {
-                        child.visible = true;
-                    });
-                }
-
-                // Verstecke schematic explizit
-                if (schematicModel) {
-                    schematicModel.setAttribute('visible', 'false');
-                    if (schematicModel.object3D) {
-                        schematicModel.object3D.visible = false;
-                        schematicModel.object3D.traverse((child) => {
-                            child.visible = false;
-                        });
-                    }
-                }
-            } else if (appState.currentMode === 'schematic' && schematicModel) {
-                // Setze BEIDE Attribute (A-Frame + THREE.js)
-                schematicModel.setAttribute('visible', 'true');
-                if (schematicModel.object3D) {
-                    schematicModel.object3D.visible = true;
-                    schematicModel.object3D.traverse((child) => {
-                        child.visible = true;
-                    });
-                }
-
-                // Verstecke atom explizit
-                if (atomModel) {
-                    atomModel.setAttribute('visible', 'false');
-                    if (atomModel.object3D) {
-                        atomModel.object3D.visible = false;
-                        atomModel.object3D.traverse((child) => {
-                            child.visible = false;
-                        });
-                    }
-                }
-            }
-        }
-    }, 200); // Backup-Watcher (requestAnimationFrame in free-mode.js ist Primary)
-}
-
-function stopVisibilityWatcher() {
-    if (visibilityWatcherInterval) {
-        clearInterval(visibilityWatcherInterval);
-        visibilityWatcherInterval = null;
-    }
-}
-
-/**
- * Deaktiviert Camera-Relative Free Mode für eine Struktur
- */
 function exitFreeMode(structureType) {
-    console.log(`[WebAR] Deaktiviere Free Mode für: ${structureType}`);
-
     appState.freeMode = false;
-
-    // Stoppe Sichtbarkeits-Watcher
-    stopVisibilityWatcher();
 
     const atomModel = document.getElementById(`${structureType}-atom`);
     const schematicModel = document.getElementById(`${structureType}-schematic`);
