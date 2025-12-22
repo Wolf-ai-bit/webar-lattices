@@ -113,8 +113,15 @@ AFRAME.registerComponent('free-mode', {
         // Mache Container zu Child der Kamera
         camera.appendChild(modelsContainer);
 
+        // WICHTIG: Deaktiviere Matrix-Auto-Update für mehr Kontrolle
+        // Dann wird A-Frame's Positions-System die Matrix nicht überschreiben
+        if (modelsContainer.object3D) {
+            modelsContainer.object3D.matrixAutoUpdate = true; // Lasse es an für simplere Logik
+        }
+
         this.isInFreeMode = true;
         this.movedContainer = modelsContainer;
+        this.camera = camera;
 
         // WICHTIG: Stelle SOFORT sicher, dass Modelle sichtbar sind
         this.forceVisibility();
@@ -164,24 +171,30 @@ AFRAME.registerComponent('free-mode', {
             if (this.isInFreeMode && this.movedContainer) {
                 const camera = document.querySelector('[camera]');
 
-                // KRITISCH: Stelle sicher, dass Container ein Child der KAMERA ist!
-                // MindAR versucht möglicherweise, den Container zurück zum Target zu bewegen
-                if (camera && this.movedContainer.parentElement !== camera) {
-                    console.warn('[FreeMode] Container wurde vom Target zurückgeholt - bewege zurück zur Kamera!');
-                    camera.appendChild(this.movedContainer);
+                if (camera) {
+                    // ULTRA-KRITISCH 1: Stelle sicher, dass Kamera selbst visible ist!
+                    camera.setAttribute('visible', 'true');
+                    if (camera.object3D) {
+                        camera.object3D.visible = true;
+                    }
+
+                    // ULTRA-KRITISCH 2: ERZWINGE bei JEDEM Frame, dass Container bei Kamera ist!
+                    // appendChild ist idempotent - wenn bereits Child, tut es nichts Schädliches
+                    const currentParent = this.movedContainer.parentElement;
+                    if (currentParent !== camera) {
+                        console.warn('[FreeMode] ⚠️ Container wurde zurückgeholt! Parent war:', currentParent?.id || 'null');
+                        camera.appendChild(this.movedContainer);
+                    }
+
+                    // ULTRA-KRITISCH 3: ERZWINGE Position bei JEDEM Frame!
+                    // Setze IMMER, nicht nur wenn geändert - ist schnell genug
+                    this.movedContainer.object3D.position.set(0, 0, -this.savedDistance);
+
+                    // Stelle sicher, dass die Matrix aktualisiert wird
+                    this.movedContainer.object3D.updateMatrix();
                 }
 
-                // KRITISCH: Stelle Position relativ zur Kamera sicher
-                const currentPos = this.movedContainer.getAttribute('position');
-                if (currentPos.z !== -this.savedDistance) {
-                    this.movedContainer.setAttribute('position', {
-                        x: 0,
-                        y: 0,
-                        z: -this.savedDistance
-                    });
-                }
-
-                // SCHRITT 1: Setze Container-Sichtbarkeit
+                // SCHRITT 1: Setze Container-Sichtbarkeit (IMMER)
                 this.movedContainer.setAttribute('visible', 'true');
                 if (this.movedContainer.object3D) {
                     this.movedContainer.object3D.visible = true;
