@@ -272,58 +272,15 @@ function hideAllModels() {
  */
 function onTargetLost(structureType) {
     console.log(`[WebAR] ${structureType.toUpperCase()} Marker verloren`);
-    console.log(`[WebAR] Modell bleibt sichtbar bis neuer QR-Code gescannt wird`);
+    console.log(`[WebAR] Modell bleibt sichtbar - Free Mode Enforcement übernimmt`);
 
-    // WICHTIG: MindAR versucht die Modelle zu verstecken - wir forcieren Sichtbarkeit!
+    // WICHTIG: TUE NICHTS mit dem Target!
+    // Das Target darf MindAR verstecken - der Container ist ja schon bei der Kamera!
+    // Der requestAnimationFrame Loop in free-mode.js kümmert sich um alles.
+
+    // Nur Status aktualisieren
     if (appState.freeMode && appState.activeStructure === structureType) {
-        // SCHRITT 1: Setze Target-Entity selbst auf visible (MindAR versteckt diese!)
-        const target = document.getElementById(`${structureType}-target`);
-        if (target) {
-            target.setAttribute('visible', 'true');
-            if (target.object3D) {
-                target.object3D.visible = true;
-                // Setze ALLE Children rekursiv auf visible
-                target.object3D.traverse((child) => {
-                    child.visible = true;
-                });
-            }
-        }
-
-        // SCHRITT 2: Setze Container auf visible
-        const container = document.getElementById(`${structureType}-models`);
-        if (container) {
-            container.setAttribute('visible', 'true');
-            if (container.object3D) {
-                container.object3D.visible = true;
-                container.object3D.traverse((child) => {
-                    child.visible = true;
-                });
-            }
-        }
-
-        // SCHRITT 3: Setze aktives Modell auf visible
-        const atomModel = document.getElementById(`${structureType}-atom`);
-        const schematicModel = document.getElementById(`${structureType}-schematic`);
-
-        if (appState.currentMode === 'atom' && atomModel) {
-            atomModel.setAttribute('visible', 'true');
-            if (atomModel.object3D) {
-                atomModel.object3D.visible = true;
-                atomModel.object3D.traverse((child) => {
-                    child.visible = true;
-                });
-            }
-            console.log('[WebAR] Atom-Modell Sichtbarkeit erzwungen');
-        } else if (appState.currentMode === 'schematic' && schematicModel) {
-            schematicModel.setAttribute('visible', 'true');
-            if (schematicModel.object3D) {
-                schematicModel.object3D.visible = true;
-                schematicModel.object3D.traverse((child) => {
-                    child.visible = true;
-                });
-            }
-            console.log('[WebAR] Schematisch-Modell Sichtbarkeit erzwungen');
-        }
+        console.log('[WebAR] Container ist bei Kamera - requestAnimationFrame Loop überwacht Sichtbarkeit');
     }
 
     // Status aktualisieren
@@ -505,23 +462,10 @@ function startVisibilityWatcher(structureType) {
         clearInterval(visibilityWatcherInterval);
     }
 
-    // Starte neuen Watcher (alle 100ms - aggressiver)
+    // Starte neuen Watcher (alle 200ms - Backup für requestAnimationFrame in free-mode.js)
+    // HAUPTSÄCHLICH für Mode-Toggle Sichtbarkeit
     visibilityWatcherInterval = setInterval(() => {
         if (appState.freeMode && appState.activeStructure === structureType) {
-            // Setze Target selbst auf visible
-            const target = document.getElementById(`${structureType}-target`);
-            if (target) {
-                target.setAttribute('visible', 'true');
-                if (target.object3D) target.object3D.visible = true;
-            }
-
-            // Setze Container auf visible
-            const container = document.getElementById(`${structureType}-models`);
-            if (container) {
-                container.setAttribute('visible', 'true');
-                if (container.object3D) container.object3D.visible = true;
-            }
-
             const atomModel = document.getElementById(`${structureType}-atom`);
             const schematicModel = document.getElementById(`${structureType}-schematic`);
 
@@ -568,7 +512,7 @@ function startVisibilityWatcher(structureType) {
                 }
             }
         }
-    }, 100); // Prüfe alle 100ms (aggressiver!)
+    }, 200); // Backup-Watcher (requestAnimationFrame in free-mode.js ist Primary)
 }
 
 function stopVisibilityWatcher() {

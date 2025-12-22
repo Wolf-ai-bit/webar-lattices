@@ -162,21 +162,32 @@ AFRAME.registerComponent('free-mode', {
         // Verwende requestAnimationFrame für kontinuierliche Updates
         const enforceVisibility = () => {
             if (this.isInFreeMode && this.movedContainer) {
-                // SCHRITT 1: Setze Target-Entity auf visible (falls MindAR es versteckt)
-                if (this.originalParent) {
-                    this.originalParent.setAttribute('visible', 'true');
-                    if (this.originalParent.object3D) {
-                        this.originalParent.object3D.visible = true;
-                    }
+                const camera = document.querySelector('[camera]');
+
+                // KRITISCH: Stelle sicher, dass Container ein Child der KAMERA ist!
+                // MindAR versucht möglicherweise, den Container zurück zum Target zu bewegen
+                if (camera && this.movedContainer.parentElement !== camera) {
+                    console.warn('[FreeMode] Container wurde vom Target zurückgeholt - bewege zurück zur Kamera!');
+                    camera.appendChild(this.movedContainer);
                 }
 
-                // SCHRITT 2: Setze Container-Sichtbarkeit
+                // KRITISCH: Stelle Position relativ zur Kamera sicher
+                const currentPos = this.movedContainer.getAttribute('position');
+                if (currentPos.z !== -this.savedDistance) {
+                    this.movedContainer.setAttribute('position', {
+                        x: 0,
+                        y: 0,
+                        z: -this.savedDistance
+                    });
+                }
+
+                // SCHRITT 1: Setze Container-Sichtbarkeit
                 this.movedContainer.setAttribute('visible', 'true');
                 if (this.movedContainer.object3D) {
                     this.movedContainer.object3D.visible = true;
                 }
 
-                // SCHRITT 3: Finde alle Modelle und setze Sichtbarkeit
+                // SCHRITT 2: Finde alle Modelle und setze Sichtbarkeit
                 const allModels = this.movedContainer.querySelectorAll('a-gltf-model');
                 allModels.forEach(model => {
                     const visible = model.getAttribute('visible');
@@ -193,7 +204,7 @@ AFRAME.registerComponent('free-mode', {
                     }
                 });
 
-                // SCHRITT 4: Nächsten Frame anfordern
+                // SCHRITT 3: Nächsten Frame anfordern
                 this.visibilityEnforcementInterval = requestAnimationFrame(enforceVisibility);
             }
         };
